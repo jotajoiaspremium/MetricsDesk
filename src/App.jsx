@@ -73,18 +73,25 @@ const brl=v=>(parseFloat(v)||0).toLocaleString("pt-BR",{style:"currency",currenc
 const num=v=>(parseInt(v)||0).toLocaleString("pt-BR");
 const pct=v=>`${(parseFloat(v)||0).toFixed(2)}%`;
 
-// getLeads: usa 'lead' como valor principal — igual ao Gerenciador de Anúncios.
-// O Meta já agrega os sub-tipos dentro de 'lead'. Somar tudo causa double-count.
-// Fallback para tipos específicos de campanha (WhatsApp, mensagens) quando lead=0.
+// getLeads: retorna o maior valor entre todos os tipos de conversão primária.
+// O Gerenciador mostra o "Resultado" da campanha que varia por objetivo:
+//   - Lead Gen → "lead"
+//   - WhatsApp Engagement → "onsite_conversion.messaging_conversation_started_7d"
+//   - Mensagens → "onsite_conversion.messaging_first_reply"
+//   - Contato → "contact"
+// Usar max() em vez de sum() ou prioridade fixa garante que batemos com o Gerenciador.
 function getLeads(actions){
   if(!actions)return 0;
-  const lead = gA(actions,"lead");
-  if(lead>0) return lead;
-  // Fallback: WhatsApp/mensagens quando objetivo não gera 'lead' direto
-  const messaging = gA(actions,"onsite_conversion.messaging_first_reply");
-  if(messaging>0) return messaging;
-  const contact = gA(actions,"contact");
-  return contact;
+  const candidates = [
+    gA(actions,"lead"),
+    gA(actions,"onsite_conversion.messaging_conversation_started_7d"),
+    gA(actions,"onsite_conversion.messaging_first_reply"),
+    gA(actions,"onsite_conversion.lead_grouped"),
+    gA(actions,"contact"),
+    gA(actions,"schedule"),
+    gA(actions,"submit_application"),
+  ];
+  return Math.max(...candidates);
 }
 // Mantém getA para outros action_types específicos
 const gA=(arr,t)=>{if(!arr)return 0;const a=arr.find(x=>x.action_type===t);return a?parseFloat(a.value):0;};
