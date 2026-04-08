@@ -29,29 +29,18 @@ const RAW_DAILY = [
   {spend:1840,roas:3.5,ctr:2.8,clicks:4350},{spend:2350,roas:3.1,ctr:3.2,clicks:5390},
   {spend:2190,roas:3.9,ctr:3.6,clicks:5120},{spend:2520,roas:3.4,ctr:2.9,clicks:5710},
 ];
-
 function getDailyDemo(range) {
-  const counts = {today:1,yesterday:1,last_7d:7,last_14d:14,last_30d:30,this_month:new Date().getDate(),last_month:30};
-  const n = Math.min(counts[range]||7, 30);
+  const counts={today:1,yesterday:1,last_7d:7,last_14d:14,last_30d:30,this_month:new Date().getDate(),last_month:30};
+  const n=Math.min(counts[range]||7,30);
   return RAW_DAILY.slice(-n).map((d,i)=>{
-    const dt=new Date(); dt.setDate(dt.getDate()-(n-1-i));
-    return {...d, date:dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})};
+    const dt=new Date();dt.setDate(dt.getDate()-(n-1-i));
+    return {...d,date:dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})};
   });
 }
 
-const D_OV = {
-  spend:"14832.50",impressions:"1284930",clicks:"38274",
-  ctr:"2.98",cpc:"0.39",cpm:"11.54",reach:"897210",frequency:"1.43",
-  actions:[{action_type:"purchase",value:"312"},{action_type:"lead",value:"840"}],
-  action_values:[{action_type:"purchase",value:"52190.00"}],
-};
-const D_OV_PREV = {
-  spend:"12940.00",impressions:"1108000",clicks:"33100",
-  ctr:"2.71",cpc:"0.42",cpm:"12.04",reach:"782000",frequency:"1.38",
-  actions:[{action_type:"purchase",value:"261"},{action_type:"lead",value:"720"}],
-  action_values:[{action_type:"purchase",value:"43830.00"}],
-};
-const D_CAMPS = [
+const D_OV={spend:"14832.50",impressions:"1284930",clicks:"38274",ctr:"2.98",cpc:"0.39",cpm:"11.54",reach:"897210",frequency:"1.43",actions:[{action_type:"purchase",value:"312"},{action_type:"lead",value:"840"}],action_values:[{action_type:"purchase",value:"52190.00"}]};
+const D_OV_PREV={spend:"12940.00",impressions:"1108000",clicks:"33100",ctr:"2.71",cpc:"0.42",cpm:"12.04",reach:"782000",frequency:"1.38",actions:[{action_type:"purchase",value:"261"},{action_type:"lead",value:"720"}],action_values:[{action_type:"purchase",value:"43830.00"}]};
+const D_CAMPS=[
   {id:"c1",name:"DOF | Ótica Premium | Conversão | Quente",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"3820.00",impressions:"312400",clicks:"9840",ctr:"3.15",cpc:"0.39",cpm:"12.23",reach:"218000",frequency:"2.1",actions:[{action_type:"purchase",value:"98"}],action_values:[{action_type:"purchase",value:"14700.00"}]}},
   {id:"c2",name:"DL Consórcios | Prospecção | Leads Qualificados",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"2940.00",impressions:"198700",clicks:"7210",ctr:"3.63",cpc:"0.41",cpm:"14.79",reach:"162000",frequency:"1.6",actions:[{action_type:"lead",value:"420"}],action_values:[{action_type:"purchase",value:"0"}]}},
   {id:"c3",name:"DOF | Remarketing 30d | Catálogo Dinâmico",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"1650.00",impressions:"84200",clicks:"4320",ctr:"5.13",cpc:"0.38",cpm:"19.60",reach:"54200",frequency:"4.4",actions:[{action_type:"purchase",value:"74"}],action_values:[{action_type:"purchase",value:"13320.00"}]}},
@@ -61,7 +50,7 @@ const D_CAMPS = [
   {id:"c7",name:"DOF | Black Friday | Engajamento",status:"PAUSED",effective_status:"PAUSED",objective:"OUTCOME_ENGAGEMENT",insights:{spend:"620.00",impressions:"84230",clicks:"1940",ctr:"2.30",cpc:"0.32",cpm:"7.36",reach:"71000",frequency:"3.9",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
   {id:"c8",name:"Teste A/B | Vídeo vs Carrossel",status:"ARCHIVED",effective_status:"ARCHIVED",objective:"OUTCOME_SALES",insights:null},
 ];
-const D_ADSETS = [
+const D_ADSETS=[
   {id:"as1",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Engajamentos 180d — Interesses Óculos",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1820.00",impressions:"142000",clicks:"4890",ctr:"3.44",cpc:"0.37",cpm:"12.82",reach:"98000",frequency:"2.1",actions:[{action_type:"purchase",value:"48"}],action_values:[{action_type:"purchase",value:"7200.00"}]}},
   {id:"as2",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Compradores 60d — Lookalike 2%",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"2000.00",impressions:"170400",clicks:"4950",ctr:"2.90",cpc:"0.40",cpm:"11.74",reach:"120000",frequency:"1.8",actions:[{action_type:"purchase",value:"50"}],action_values:[{action_type:"purchase",value:"7500.00"}]}},
   {id:"as3",campaign:"DL Consórcios | Prospecção | Leads Qualificados",cid:"c2",name:"Lookalike 3% — Clientes Ativos",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1240.00",impressions:"88000",clicks:"3200",ctr:"3.64",cpc:"0.39",cpm:"14.09",reach:"72000",frequency:"1.4",actions:[{action_type:"lead",value:"198"}],action_values:[{action_type:"purchase",value:"0"}]}},
@@ -71,8 +60,8 @@ const D_ADSETS = [
   {id:"as7",campaign:"DOF | Topo de Funil | Interesses Amplos",cid:"c5",name:"Interesses — Moda e Beleza",status:"PAUSED",effective_status:"CAMPAIGN_PAUSED",insights:{spend:"480.00",impressions:"102000",clicks:"700",ctr:"0.69",cpc:"0.69",cpm:"4.71",reach:"84000",frequency:"2.1",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
   {id:"as8",campaign:"DL Consórcios | Veículos | Público Amplo",cid:"c6",name:"Público Amplo 25–45 — Sudeste",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1840.00",impressions:"142000",clicks:"4210",ctr:"2.96",cpc:"0.44",cpm:"12.96",reach:"98000",frequency:"2.3",actions:[{action_type:"lead",value:"110"}],action_values:[{action_type:"purchase",value:"0"}]}},
 ];
-const GRAD = [["#1A0533","#7C3AED"],["#03141F","#0EA5E9"],["#1A2700","#65A30D"],["#1F0A00","#EA580C"],["#170024","#DB2777"],["#001A1A","#0D9488"]];
-const D_CREATIVES = [
+const GRAD=[["#1A0533","#7C3AED"],["#03141F","#0EA5E9"],["#1A2700","#65A30D"],["#1F0A00","#EA580C"],["#170024","#DB2777"],["#001A1A","#0D9488"]];
+const D_CREATIVES=[
   {id:"cr1",cid:"c1",campaign:"DOF | Ótica Premium | Conversão | Quente",name:"Titanium Stories — Vídeo 15s",format:"Vídeo",thumb:null,grad:GRAD[0],title:"Óculos de titânio a partir de R$ 299",insights:{spend:"1420.00",impressions:"98400",clicks:"3210",ctr:"3.26",cpc:"0.44",frequency:"1.9",actions:[{action_type:"purchase",value:"38"}],action_values:[{action_type:"purchase",value:"5700.00"}]}},
   {id:"cr2",cid:"c1",campaign:"DOF | Ótica Premium | Conversão | Quente",name:"30% OFF — Feed Carrossel",format:"Carrossel",thumb:null,grad:GRAD[1],title:"30% OFF em toda a coleção",insights:{spend:"980.00",impressions:"72000",clicks:"2840",ctr:"3.94",cpc:"0.35",frequency:"2.3",actions:[{action_type:"purchase",value:"28"}],action_values:[{action_type:"purchase",value:"4200.00"}]}},
   {id:"cr3",cid:"c3",campaign:"DOF | Remarketing 30d | Catálogo Dinâmico",name:"Catálogo Dinâmico — Remarketing",format:"Imagem",thumb:null,grad:GRAD[2],title:"Você viu esse produto",insights:{spend:"650.00",impressions:"31200",clicks:"1920",ctr:"6.15",cpc:"0.34",frequency:"4.8",actions:[{action_type:"purchase",value:"42"}],action_values:[{action_type:"purchase",value:"6300.00"}]}},
@@ -81,8 +70,8 @@ const D_CREATIVES = [
   {id:"cr6",cid:"c4",campaign:"DL Consórcios | Imóveis | Lookalike 3%",name:"Simulação Rápida — Feed Imagem",format:"Imagem",thumb:null,grad:GRAD[5],title:"Simule em 2 minutos",insights:{spend:"920.00",impressions:"94000",clicks:"2410",ctr:"2.56",cpc:"0.38",frequency:"1.6",actions:[{action_type:"lead",value:"148"}],action_values:[{action_type:"purchase",value:"0"}]}},
 ];
 
-function getDP(range) {
-  const t=new Date(), fmt=d=>d.toISOString().split("T")[0], sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
+function getDP(range){
+  const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
   switch(range){
     case"today":return{since:fmt(t),until:fmt(t)};
     case"yesterday":{const d=sub(1);return{since:fmt(d),until:fmt(d)};}
@@ -94,8 +83,8 @@ function getDP(range) {
     default:return{since:fmt(t),until:fmt(t)};
   }
 }
-function getPrevDP(range) {
-  const t=new Date(), fmt=d=>d.toISOString().split("T")[0], sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
+function getPrevDP(range){
+  const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
   switch(range){
     case"today":return{since:fmt(sub(1)),until:fmt(sub(1))};
     case"yesterday":return{since:fmt(sub(2)),until:fmt(sub(2))};
@@ -114,26 +103,21 @@ const pct=v=>`${(parseFloat(v)||0).toFixed(2)}%`;
 const gA=(arr,t)=>{if(!arr)return 0;const a=arr.find(x=>x.action_type===t);return a?parseFloat(a.value):0;};
 const delta=(cur,prev)=>prev>0?((cur-prev)/prev)*100:null;
 
-// FIX: effective_status mapping
-function statusLabel(es) {
-  const map = {
-    ACTIVE:"ACTIVE", PAUSED:"PAUSED", DELETED:"DELETED", ARCHIVED:"ARCHIVED",
-    CAMPAIGN_PAUSED:"CAMP. PAUSADA", ADSET_PAUSED:"CONJUNTO PAUSADO",
-    IN_PROCESS:"EM PROCESSO", WITH_ISSUES:"COM PROBLEMAS",
-  };
-  return map[es] || es;
+function statusLabel(es){
+  const m={ACTIVE:"ACTIVE",PAUSED:"PAUSED",DELETED:"DELETED",ARCHIVED:"ARCHIVED",CAMPAIGN_PAUSED:"CAMP. PAUSADA",ADSET_PAUSED:"CONJ. PAUSADO",IN_PROCESS:"EM PROCESSO",WITH_ISSUES:"COM PROBLEMAS"};
+  return m[es]||es;
 }
-function statusColor(es) {
-  if(es==="ACTIVE") return "green";
-  if(es==="PAUSED"||es==="CAMPAIGN_PAUSED"||es==="ADSET_PAUSED") return "yellow";
-  if(es==="DELETED"||es==="ARCHIVED") return "gray";
-  if(es==="WITH_ISSUES"||es==="IN_PROCESS") return "blue";
-  return "gray";
+function statusColor(es){
+  if(es==="ACTIVE")return"green";
+  if(["PAUSED","CAMPAIGN_PAUSED","ADSET_PAUSED"].includes(es))return"yellow";
+  if(["DELETED","ARCHIVED"].includes(es))return"gray";
+  if(["WITH_ISSUES","IN_PROCESS"].includes(es))return"blue";
+  return"gray";
 }
 
 async function fetchM(path,params,token){
   const url=new URL(`${BASE}/${path}`);
-  url.searchParams.set("access_token",token);
+  if(token)url.searchParams.set("access_token",token);
   Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
   const r=await fetch(url.toString());
   const d=await r.json();
@@ -153,11 +137,19 @@ async function fetchPages(path,params,token){
   return res;
 }
 
-function getAlerts(camp, avgCpc) {
-  const ins=camp.insights; if(!ins)return [];
+// Creative fields for separate endpoint call
+const CR_FIELDS=[
+  "thumbnail_url","image_url","title","body",
+  "call_to_action_type","video_id",
+  "object_story_spec{link_data{picture,child_attachments,name,description},video_data{image_url,title}}",
+  "asset_feed_spec{images,videos,titles,bodies}",
+].join(",");
+
+function getAlerts(camp,avgCpc){
+  const ins=camp.insights;if(!ins)return[];
   const alerts=[];
-  const ctr=parseFloat(ins.ctr)||0, spend=parseFloat(ins.spend)||0;
-  const freq=parseFloat(ins.frequency)||0, cpc=parseFloat(ins.cpc)||0;
+  const ctr=parseFloat(ins.ctr)||0,spend=parseFloat(ins.spend)||0;
+  const freq=parseFloat(ins.frequency)||0,cpc=parseFloat(ins.cpc)||0;
   const purch=gA(ins.actions,"purchase");
   if(ctr>0&&ctr<1)alerts.push({c:"warn",l:"CTR baixo"});
   if(spend>300&&purch===0&&camp.objective==="OUTCOME_SALES")alerts.push({c:"alert",l:"Sem conversões"});
@@ -181,7 +173,6 @@ const Ic={
   cart:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>,
   roas:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
   refresh:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
-  settings:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
   back:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
   plus:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   chevron:()=><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>,
@@ -219,8 +210,8 @@ function Badge({children,color="gray"}){
 }
 
 function Stat({label,value,dlt,icon:I,hi,neutral,invert}){
-  const pos = invert ? dlt<0 : dlt>0;
-  const dc = neutral?T.sub : pos?T.green:T.red;
+  const pos=invert?dlt<0:dlt>0;
+  const dc=neutral?T.sub:pos?T.green:T.red;
   return(
     <div className="ch" style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:10,padding:"16px 18px",transition:"all 0.2s",cursor:"default"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
@@ -250,20 +241,15 @@ const METRICS=[
   {k:"ctr",l:"CTR",c:T.blue,fmt:v=>`${Number(v).toFixed(2)}%`,axis:"right"},
   {k:"clicks",l:"Cliques",c:T.sub,fmt:num,axis:"left"},
 ];
-
 function ChartTip({active,payload,label}){
   if(!active||!payload?.length)return null;
   return(
     <div style={{background:T.s2,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 14px",minWidth:160}}>
       <p style={{fontSize:10,color:T.sub,marginBottom:8,fontFamily:"'JetBrains Mono',monospace"}}>{label}</p>
-      {payload.map(p=>{
-        const m=METRICS.find(x=>x.k===p.dataKey);
-        return <p key={p.dataKey} style={{fontSize:12,color:p.stroke,fontFamily:"'JetBrains Mono',monospace",marginBottom:2}}>{m?.l}: {m?.fmt(p.value)}</p>;
-      })}
+      {payload.map(p=>{const m=METRICS.find(x=>x.k===p.dataKey);return <p key={p.dataKey} style={{fontSize:12,color:p.stroke,fontFamily:"'JetBrains Mono',monospace",marginBottom:2}}>{m?.l}: {m?.fmt(p.value)}</p>;})}
     </div>
   );
 }
-
 function TimeChart({data}){
   const [active,setActive]=useState(["spend","roas"]);
   const toggle=k=>setActive(p=>p.includes(k)?p.filter(x=>x!==k):[...p,k]);
@@ -274,11 +260,7 @@ function TimeChart({data}){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10}}>
         <span style={{fontSize:13,fontWeight:600,color:T.text}}>Performance diária</span>
         <div style={{display:"flex",gap:5}}>
-          {METRICS.map(m=>(
-            <button key={m.k} className={`pill${active.includes(m.k)?" on":""}`} onClick={()=>toggle(m.k)} style={{borderColor:active.includes(m.k)?m.c+"60":"",color:active.includes(m.k)?m.c:""}}>
-              {m.l}
-            </button>
-          ))}
+          {METRICS.map(m=><button key={m.k} className={`pill${active.includes(m.k)?" on":""}`} onClick={()=>toggle(m.k)} style={{borderColor:active.includes(m.k)?m.c+"60":"",color:active.includes(m.k)?m.c:""}}>{m.l}</button>)}
         </div>
       </div>
       <ResponsiveContainer width="100%" height={190}>
@@ -288,10 +270,7 @@ function TimeChart({data}){
           {leftM.length>0&&<YAxis yAxisId="left" orientation="left" tick={{fontSize:9,fill:T.muted,fontFamily:"'JetBrains Mono',monospace"}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?`${(v/1000).toFixed(0)}k`:v} width={38}/>}
           {rightM.length>0&&<YAxis yAxisId="right" orientation="right" tick={{fontSize:9,fill:T.muted,fontFamily:"'JetBrains Mono',monospace"}} axisLine={false} tickLine={false} tickFormatter={v=>`${v}`} width={32}/>}
           <Tooltip content={<ChartTip/>} cursor={{stroke:T.border}}/>
-          {active.map(k=>{
-            const m=METRICS.find(x=>x.k===k);
-            return <Line key={k} yAxisId={m.axis} type="monotone" dataKey={k} stroke={m.c} strokeWidth={1.8} dot={false} activeDot={{r:3,fill:m.c}}/>;
-          })}
+          {active.map(k=>{const m=METRICS.find(x=>x.k===k);return <Line key={k} yAxisId={m.axis} type="monotone" dataKey={k} stroke={m.c} strokeWidth={1.8} dot={false} activeDot={{r:3,fill:m.c}}/>;  })}
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -300,8 +279,8 @@ function TimeChart({data}){
 
 function CreativeCard({cr,rank,maxVal,sortM}){
   const ins=cr.insights;
-  const s=parseFloat(ins?.spend)||0, rv=gA(ins?.action_values,"purchase");
-  const roas=s>0?rv/s:0, leads=gA(ins?.actions,"lead"), purch=gA(ins?.actions,"purchase");
+  const s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase");
+  const roas=s>0?rv/s:0,leads=gA(ins?.actions,"lead"),purch=gA(ins?.actions,"purchase");
   const curVal=sortM==="roas"?roas:sortM==="ctr"?parseFloat(ins?.ctr)||0:parseFloat(ins?.spend)||0;
   const pct100=maxVal>0?Math.round((curVal/maxVal)*100):0;
   const rank_colors=[T.accent,T.text,T.sub];
@@ -317,16 +296,13 @@ function CreativeCard({cr,rank,maxVal,sortM}){
       <div style={{position:"relative",height:170,background:`linear-gradient(135deg,${c1},${c2})`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}>
         {cr.thumb
           ?<img src={cr.thumb} alt="" style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}} onError={e=>{e.target.style.display="none";}}/>
-          :<><div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.35)"}}>{FmtI}</div>
-          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.08em"}}>{(cr.format||"IMAGEM").toUpperCase()}</span></>
+          :<><div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.35)"}}>{FmtI}</div><span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.08em"}}>{(cr.format||"IMAGEM").toUpperCase()}</span></>
         }
         {rank<=3&&<div style={{position:"absolute",top:8,left:8,width:22,height:22,borderRadius:6,background:rank===1?T.accent:rank===2?T.b2:T.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:rank===1?T.bg:rank_colors[rank-1],fontFamily:"'JetBrains Mono',monospace"}}>{rank}</div>}
         {FreqWarn&&<div style={{position:"absolute",top:8,right:8,background:T.blue+"22",border:`1px solid ${T.blue}44`,borderRadius:5,padding:"2px 6px",fontSize:9,fontWeight:700,color:T.blue,fontFamily:"'JetBrains Mono',monospace"}}>FREQ {parseFloat(ins?.frequency).toFixed(1)}x</div>}
         {roas>0&&<div style={{position:"absolute",bottom:8,right:8,background:"#00000088",border:`1px solid ${roas>=2?T.green+"44":T.border}`,borderRadius:5,padding:"2px 6px",fontSize:10,fontWeight:600,color:roas>=2?T.green:T.sub,fontFamily:"'JetBrains Mono',monospace"}}>{roas.toFixed(2)}x</div>}
       </div>
-      <div style={{height:2,background:T.border}}>
-        <div style={{height:"100%",width:`${pct100}%`,background:rank===1?T.accent:T.b2,transition:"width 0.6s ease"}}/>
-      </div>
+      <div style={{height:2,background:T.border}}><div style={{height:"100%",width:`${pct100}%`,background:rank===1?T.accent:T.b2,transition:"width 0.6s ease"}}/></div>
       <div style={{padding:"13px 14px 15px",display:"flex",flexDirection:"column",gap:10,flex:1}}>
         <div>
           <p style={{fontSize:12,fontWeight:600,color:T.text,lineHeight:1.4,marginBottom:3}}>{cr.name}</p>
@@ -375,9 +351,7 @@ function AccountSwitcher({accounts,activeId,onSwitch,onAdd,onRemove}){
           ))}
           <div style={{height:1,background:T.border,margin:"5px 0"}}/>
           <div className="dd-item" onClick={()=>{onAdd();setOpen(false);}}>
-            <div style={{display:"flex",alignItems:"center",gap:7,color:T.sub}}>
-              <Ic.plus/><span style={{fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>Adicionar conta</span>
-            </div>
+            <div style={{display:"flex",alignItems:"center",gap:7,color:T.sub}}><Ic.plus/><span style={{fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>Adicionar conta</span></div>
           </div>
         </div>
       )}
@@ -394,9 +368,7 @@ function Login({onDemo,onConnect}){
       <div style={{position:"relative",width:"100%",maxWidth:370,animation:"fadeUp 0.45s ease"}}>
         <div style={{marginBottom:40,textAlign:"center"}}>
           <div style={{display:"inline-flex",alignItems:"center",gap:9,marginBottom:12}}>
-            <div style={{width:30,height:30,borderRadius:8,background:T.accent,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.bg} strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </div>
+            <div style={{width:30,height:30,borderRadius:8,background:T.accent,display:"flex",alignItems:"center",justifyContent:"center"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.bg} strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
             <span style={{fontSize:19,fontWeight:800,color:T.text,letterSpacing:"-0.04em"}}>MetricsDesk</span>
           </div>
           <p style={{fontSize:12,color:T.sub}}>Dashboard de tráfego pago</p>
@@ -436,7 +408,7 @@ function Config({onSave,onClose}){
     <div style={{position:"fixed",inset:0,background:"#00000099",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(4px)"}}>
       <div style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:16,padding:28,width:440,maxWidth:"90vw"}}>
         <p style={{fontSize:16,fontWeight:700,color:T.text,marginBottom:5}}>Adicionar conta</p>
-        <p style={{fontSize:12,color:T.sub,marginBottom:20,lineHeight:1.7}}>Insira as credenciais do Meta Graph API. Você pode adicionar múltiplas contas.</p>
+        <p style={{fontSize:12,color:T.sub,marginBottom:20,lineHeight:1.7}}>Insira as credenciais do Meta Graph API.</p>
         <div style={{display:"flex",flexDirection:"column",gap:13,marginBottom:18}}>
           <div><label style={lbl}>Nome da conta</label><input style={inp} placeholder="Ex: Ótica DOF, DL Consórcios..." value={name} onChange={e=>setName(e.target.value)}/></div>
           <div><label style={lbl}>Access Token</label><input style={inp} type="password" placeholder="EAAxxxxxxxxxxxxxxx..." value={tok} onChange={e=>setTok(e.target.value)}/></div>
@@ -491,6 +463,7 @@ export default function App(){
       const dp=getDP(dateRange),pdp=getPrevDP(dateRange);
       const tr=JSON.stringify({since:dp.since,until:dp.until}),ptr=JSON.stringify({since:pdp.since,until:pdp.until});
 
+      // Overview atual + anterior
       const [ovR,ovPR]=await Promise.all([
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:tr,level:"account"},token),
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:ptr,level:"account"},token),
@@ -498,6 +471,7 @@ export default function App(){
       setOv(ovR.data?.[0]||null);
       setOvPrev(ovPR.data?.[0]||null);
 
+      // Gráfico diário
       const dR=await fetchM(`act_${accountId}/insights`,{fields:"spend,impressions,clicks,ctr,actions,action_values",time_range:tr,level:"account",time_increment:1},token);
       setDaily((dR.data||[]).map(d=>({
         date:d.date_start?.slice(5).replace("-","/"),
@@ -507,74 +481,67 @@ export default function App(){
         clicks:parseInt(d.clicks)||0,
       })));
 
-      // Campaigns
+      // Campanhas com effective_status
       const cs=await fetchPages(`act_${accountId}/campaigns`,{fields:"id,name,status,effective_status,objective"},token);
       const ci=await Promise.all(cs.map(async c=>{
-        try{
-          const r=await fetchM(`${c.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
-          return{...c,effective_status:c.effective_status||c.status,insights:r.data?.[0]||null};
-        }catch{
-          return{...c,effective_status:c.effective_status||c.status,insights:null};
-        }
+        try{const r=await fetchM(`${c.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...c,effective_status:c.effective_status||c.status,insights:r.data?.[0]||null};}
+        catch{return{...c,effective_status:c.effective_status||c.status,insights:null};}
       }));
       setCamps(ci);
 
-      // FIX: AdSets — use effective_status
-      const as=await fetchPages(`act_${accountId}/adsets`,{
-        fields:"id,name,status,effective_status,campaign_id,campaign{name}",
-      },token);
+      // Conjuntos com effective_status
+      const as=await fetchPages(`act_${accountId}/adsets`,{fields:"id,name,status,effective_status,campaign_id,campaign{name}"},token);
       const asi=await Promise.all(as.map(async a=>{
-        try{
-          const r=await fetchM(`${a.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
-          return{
-            ...a,
-            campaign:a.campaign?.name||"",
-            cid:a.campaign_id,
-            effective_status:a.effective_status||a.status,
-            insights:r.data?.[0]||null,
-          };
-        }catch{
-          return{...a,campaign:"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:null};
-        }
+        try{const r=await fetchM(`${a.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...a,campaign:a.campaign?.name||"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:r.data?.[0]||null};}
+        catch{return{...a,campaign:"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:null};}
       }));
       setAdsets(asi);
 
-      // FIX: Creatives — expanded fields for thumbnail and format detection
-      const CREATIVE_FIELDS = [
-        "id","thumbnail_url","image_url","title","body",
-        "call_to_action_type","video_id",
-        "object_story_spec{link_data{picture,child_attachments,name,description},video_data{image_url,title}}",
-      ].join(",");
-
+      // ─── CRIATIVOS: busca anúncios + criativo separado pelo endpoint do creative_id ───
+      // Passo 1: busca todos os anúncios com apenas o creative.id (sem campos extras)
       const ads=await fetchPages(`act_${accountId}/ads`,{
-        fields:`id,name,status,effective_status,campaign_id,creative{${CREATIVE_FIELDS}}`,
-        effective_status:'["ACTIVE","PAUSED","ARCHIVED"]',
+        fields:"id,name,status,effective_status,campaign_id,creative{id}",
       },token);
 
+      // Passo 2: para cada anúncio, busca insights E criativo em paralelo
       const adsI=await Promise.all(ads.slice(0,60).map(async ad=>{
         try{
-          const r=await fetchM(`${ad.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
-          const cr=ad.creative;
+          // Busca insights e creative em paralelo
+          const insPromise=fetchM(`${ad.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token).catch(()=>({data:[]}));
+          const creativeId=ad.creative?.id;
+          const crPromise=creativeId
+            ?fetchM(creativeId,{fields:CR_FIELDS},token).catch(()=>({}))
+            :Promise.resolve({});
+          const [insR,crDetails]=await Promise.all([insPromise,crPromise]);
+
           const camp=ci.find(c=>c.id===ad.campaign_id);
 
-          // FIX: Detect format correctly
-          const isVideo=!!(cr?.video_id||cr?.object_story_spec?.video_data);
-          const isCarousel=!!(cr?.object_story_spec?.link_data?.child_attachments?.length);
+          // Detecta formato pelo conteúdo real do criativo
+          const isVideo=!!(crDetails.video_id||crDetails.object_story_spec?.video_data);
+          const isCarousel=!!(crDetails.object_story_spec?.link_data?.child_attachments?.length);
           const format=isVideo?"Vídeo":isCarousel?"Carrossel":"Imagem";
 
-          // FIX: Try all possible thumbnail locations
+          // Tenta todas as fontes possíveis de thumbnail
           const thumb=
-            cr?.thumbnail_url||
-            cr?.image_url||
-            cr?.object_story_spec?.link_data?.picture||
-            cr?.object_story_spec?.video_data?.image_url||
+            crDetails.thumbnail_url||
+            crDetails.image_url||
+            crDetails.object_story_spec?.link_data?.picture||
+            crDetails.object_story_spec?.video_data?.image_url||
+            crDetails.asset_feed_spec?.images?.[0]?.url||
             null;
 
+          // Tenta todas as fontes possíveis de título
           const title=
-            cr?.title||
-            cr?.object_story_spec?.link_data?.name||
-            cr?.object_story_spec?.video_data?.title||
+            crDetails.title||
+            crDetails.object_story_spec?.link_data?.name||
+            crDetails.object_story_spec?.video_data?.title||
+            crDetails.asset_feed_spec?.titles?.[0]?.text||
             ad.name||"";
+
+          const body=
+            crDetails.body||
+            crDetails.object_story_spec?.link_data?.description||
+            crDetails.asset_feed_spec?.bodies?.[0]?.text||"";
 
           return{
             id:ad.id,
@@ -585,9 +552,9 @@ export default function App(){
             format,
             thumb,
             title,
-            body:cr?.body||cr?.object_story_spec?.link_data?.description||"",
+            body,
             grad:GRAD[Math.floor(Math.random()*GRAD.length)],
-            insights:r.data?.[0]||null,
+            insights:insR.data?.[0]||null,
           };
         }catch{return null;}
       }));
@@ -798,7 +765,6 @@ export default function App(){
                         <p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{a.name}</p>
                         <p style={{fontSize:10,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.campaign}</p>
                       </td>
-                      {/* FIX: Use effective_status for accurate status */}
                       <td style={tdS}><Badge color={statusColor(es)}>{statusLabel(es)}</Badge></td>
                       <td style={{...tdS,color:T.accent,fontWeight:600}}>{ins?brl(ins.spend):"—"}</td>
                       <td style={tdS}>{ins?num(ins.clicks):"—"}</td>
