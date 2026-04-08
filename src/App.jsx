@@ -5,7 +5,7 @@ const API_V = "v19.0";
 const BASE = `https://graph.facebook.com/${API_V}`;
 const INS_F = "spend,impressions,clicks,ctr,cpc,cpm,reach,frequency,actions,action_values";
 // Todos os status possíveis de anúncio
-const ALL_AD_STATUSES = JSON.stringify(["ACTIVE","PAUSED","ARCHIVED","DELETED","IN_PROCESS","WITH_ISSUES","CAMPAIGN_PAUSED","ADSET_PAUSED"]);
+const ALL_AD_STATUSES = JSON.stringify(["ACTIVE","PAUSED","ARCHIVED","CAMPAIGN_PAUSED","ADSET_PAUSED","WITH_ISSUES"]);
 
 const T = {
   bg:"#06070A", s1:"#0C0D12", s2:"#111318", border:"#1C1E26", b2:"#252830",
