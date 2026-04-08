@@ -4,6 +4,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 const API_V = "v19.0";
 const BASE = `https://graph.facebook.com/${API_V}`;
 const INS_F = "spend,impressions,clicks,ctr,cpc,cpm,reach,frequency,actions,action_values";
+// Todos os status possíveis de anúncio
+const ALL_AD_STATUSES = JSON.stringify(["ACTIVE","PAUSED","ARCHIVED","DELETED","IN_PROCESS","WITH_ISSUES","CAMPAIGN_PAUSED","ADSET_PAUSED"]);
 
 const T = {
   bg:"#06070A", s1:"#0C0D12", s2:"#111318", border:"#1C1E26", b2:"#252830",
@@ -70,32 +72,8 @@ const D_CREATIVES=[
   {id:"cr6",cid:"c4",campaign:"DL Consórcios | Imóveis | Lookalike 3%",name:"Simulação Rápida — Feed Imagem",format:"Imagem",thumb:null,grad:GRAD[5],title:"Simule em 2 minutos",insights:{spend:"920.00",impressions:"94000",clicks:"2410",ctr:"2.56",cpc:"0.38",frequency:"1.6",actions:[{action_type:"lead",value:"148"}],action_values:[{action_type:"purchase",value:"0"}]}},
 ];
 
-function getDP(range){
-  const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
-  switch(range){
-    case"today":return{since:fmt(t),until:fmt(t)};
-    case"yesterday":{const d=sub(1);return{since:fmt(d),until:fmt(d)};}
-    case"last_7d":return{since:fmt(sub(7)),until:fmt(t)};
-    case"last_14d":return{since:fmt(sub(14)),until:fmt(t)};
-    case"last_30d":return{since:fmt(sub(30)),until:fmt(t)};
-    case"this_month":{const s=new Date(t.getFullYear(),t.getMonth(),1);return{since:fmt(s),until:fmt(t)};}
-    case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}
-    default:return{since:fmt(t),until:fmt(t)};
-  }
-}
-function getPrevDP(range){
-  const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
-  switch(range){
-    case"today":return{since:fmt(sub(1)),until:fmt(sub(1))};
-    case"yesterday":return{since:fmt(sub(2)),until:fmt(sub(2))};
-    case"last_7d":return{since:fmt(sub(14)),until:fmt(sub(8))};
-    case"last_14d":return{since:fmt(sub(28)),until:fmt(sub(15))};
-    case"last_30d":return{since:fmt(sub(60)),until:fmt(sub(31))};
-    case"this_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}
-    case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-2,1),e=new Date(t.getFullYear(),t.getMonth()-1,0);return{since:fmt(s),until:fmt(e)};}
-    default:return{since:fmt(sub(1)),until:fmt(sub(1))};
-  }
-}
+function getDP(r){const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};switch(r){case"today":return{since:fmt(t),until:fmt(t)};case"yesterday":{const d=sub(1);return{since:fmt(d),until:fmt(d)};}case"last_7d":return{since:fmt(sub(7)),until:fmt(t)};case"last_14d":return{since:fmt(sub(14)),until:fmt(t)};case"last_30d":return{since:fmt(sub(30)),until:fmt(t)};case"this_month":{const s=new Date(t.getFullYear(),t.getMonth(),1);return{since:fmt(s),until:fmt(t)};}case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}default:return{since:fmt(t),until:fmt(t)};}}
+function getPrevDP(r){const t=new Date(),fmt=d=>d.toISOString().split("T")[0],sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};switch(r){case"today":return{since:fmt(sub(1)),until:fmt(sub(1))};case"yesterday":return{since:fmt(sub(2)),until:fmt(sub(2))};case"last_7d":return{since:fmt(sub(14)),until:fmt(sub(8))};case"last_14d":return{since:fmt(sub(28)),until:fmt(sub(15))};case"last_30d":return{since:fmt(sub(60)),until:fmt(sub(31))};case"this_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-2,1),e=new Date(t.getFullYear(),t.getMonth()-1,0);return{since:fmt(s),until:fmt(e)};}default:return{since:fmt(sub(1)),until:fmt(sub(1))};}}
 
 const brl=v=>(parseFloat(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const num=v=>(parseInt(v)||0).toLocaleString("pt-BR");
@@ -103,17 +81,8 @@ const pct=v=>`${(parseFloat(v)||0).toFixed(2)}%`;
 const gA=(arr,t)=>{if(!arr)return 0;const a=arr.find(x=>x.action_type===t);return a?parseFloat(a.value):0;};
 const delta=(cur,prev)=>prev>0?((cur-prev)/prev)*100:null;
 
-function statusLabel(es){
-  const m={ACTIVE:"ACTIVE",PAUSED:"PAUSED",DELETED:"DELETED",ARCHIVED:"ARCHIVED",CAMPAIGN_PAUSED:"CAMP. PAUSADA",ADSET_PAUSED:"CONJ. PAUSADO",IN_PROCESS:"EM PROCESSO",WITH_ISSUES:"COM PROBLEMAS"};
-  return m[es]||es;
-}
-function statusColor(es){
-  if(es==="ACTIVE")return"green";
-  if(["PAUSED","CAMPAIGN_PAUSED","ADSET_PAUSED"].includes(es))return"yellow";
-  if(["DELETED","ARCHIVED"].includes(es))return"gray";
-  if(["WITH_ISSUES","IN_PROCESS"].includes(es))return"blue";
-  return"gray";
-}
+function statusLabel(es){const m={ACTIVE:"ACTIVE",PAUSED:"PAUSED",DELETED:"DELETED",ARCHIVED:"ARCHIVED",CAMPAIGN_PAUSED:"CAMP. PAUSADA",ADSET_PAUSED:"CONJ. PAUSADO",IN_PROCESS:"EM PROCESSO",WITH_ISSUES:"COM PROBLEMAS"};return m[es]||es;}
+function statusColor(es){if(es==="ACTIVE")return"green";if(["PAUSED","CAMPAIGN_PAUSED","ADSET_PAUSED"].includes(es))return"yellow";if(["DELETED","ARCHIVED"].includes(es))return"gray";if(["WITH_ISSUES","IN_PROCESS"].includes(es))return"blue";return"gray";}
 
 async function fetchM(path,params,token){
   const url=new URL(`${BASE}/${path}`);
@@ -121,26 +90,41 @@ async function fetchM(path,params,token){
   Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
   const r=await fetch(url.toString());
   const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
+  if(d.error)throw new Error(`[${path}] ${d.error.message}`);
   return d;
 }
 async function fetchPages(path,params,token){
   let res=[],cur=null;
-  do{
-    const p={...params,limit:100};
-    if(cur)p.after=cur;
-    const d=await fetchM(path,p,token);
-    res=res.concat(d.data||[]);
-    cur=d.paging?.cursors?.after;
-    if(!d.paging?.next)cur=null;
-  }while(cur);
+  do{const p={...params,limit:200};if(cur)p.after=cur;const d=await fetchM(path,p,token);res=res.concat(d.data||[]);cur=d.paging?.cursors?.after;if(!d.paging?.next)cur=null;}while(cur);
   return res;
 }
 
-// Creative fields for separate endpoint call
-const CR_FIELDS=[
-  "thumbnail_url","image_url","title","body",
-  "call_to_action_type","video_id",
+// Busca insights de TODOS os anúncios de uma vez (muito mais eficiente e confiável)
+async function fetchAllAdInsights(accountId, tr, token) {
+  const map = {};
+  try {
+    let cursor = null;
+    do {
+      const params = {
+        fields: INS_F + ",frequency,ad_id,ad_name",
+        time_range: tr,
+        level: "ad",
+        limit: 500,
+      };
+      if (cursor) params.after = cursor;
+      const d = await fetchM(`act_${accountId}/insights`, params, token);
+      (d.data || []).forEach(ins => { map[ins.ad_id] = ins; });
+      cursor = d.paging?.cursors?.after;
+      if (!d.paging?.next) cursor = null;
+    } while (cursor);
+  } catch(e) {
+    console.warn("fetchAllAdInsights error:", e.message);
+  }
+  return map;
+}
+
+const CR_FIELDS = [
+  "thumbnail_url","image_url","title","body","call_to_action_type","video_id",
   "object_story_spec{link_data{picture,child_attachments,name,description},video_data{image_url,title}}",
   "asset_feed_spec{images,videos,titles,bodies}",
 ].join(",");
@@ -208,29 +192,23 @@ function Badge({children,color="gray"}){
   const [bg,tc,bc]=m[color]||m.gray;
   return <span style={{display:"inline-block",padding:"2px 8px",borderRadius:4,fontSize:10,fontWeight:600,letterSpacing:"0.07em",background:bg,color:tc,border:`1px solid ${bc}`,textTransform:"uppercase",fontFamily:"'JetBrains Mono',monospace"}}>{children}</span>;
 }
-
 function Stat({label,value,dlt,icon:I,hi,neutral,invert}){
-  const pos=invert?dlt<0:dlt>0;
-  const dc=neutral?T.sub:pos?T.green:T.red;
+  const pos=invert?dlt<0:dlt>0;const dc=neutral?T.sub:pos?T.green:T.red;
   return(
     <div className="ch" style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:10,padding:"16px 18px",transition:"all 0.2s",cursor:"default"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <span style={{color:hi?T.accent:T.muted}}><I/></span>
-          <span style={{fontSize:10,color:T.sub,letterSpacing:"0.07em",textTransform:"uppercase",fontFamily:"'JetBrains Mono',monospace"}}>{label}</span>
-        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{color:hi?T.accent:T.muted}}><I/></span><span style={{fontSize:10,color:T.sub,letterSpacing:"0.07em",textTransform:"uppercase",fontFamily:"'JetBrains Mono',monospace"}}>{label}</span></div>
         {dlt!=null&&<span style={{fontSize:10,color:dc,fontFamily:"'JetBrains Mono',monospace",fontWeight:600}}>{dlt>0?"+":""}{dlt.toFixed(1)}%</span>}
       </div>
       <div style={{fontSize:22,fontWeight:700,color:hi?T.accent:T.text,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"-0.02em"}}>{value}</div>
     </div>
   );
 }
-
-function Spinner(){
+function Spinner({msg}){
   return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"80px",gap:12,flexDirection:"column"}}>
       <div style={{width:26,height:26,border:`1.5px solid ${T.border}`,borderTop:`1.5px solid ${T.accent}`,borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
-      <span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.06em"}}>Carregando dados...</span>
+      <span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.06em"}}>{msg||"Carregando dados..."}</span>
     </div>
   );
 }
@@ -259,9 +237,7 @@ function TimeChart({data}){
     <div style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:12,padding:"18px 20px 10px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10}}>
         <span style={{fontSize:13,fontWeight:600,color:T.text}}>Performance diária</span>
-        <div style={{display:"flex",gap:5}}>
-          {METRICS.map(m=><button key={m.k} className={`pill${active.includes(m.k)?" on":""}`} onClick={()=>toggle(m.k)} style={{borderColor:active.includes(m.k)?m.c+"60":"",color:active.includes(m.k)?m.c:""}}>{m.l}</button>)}
-        </div>
+        <div style={{display:"flex",gap:5}}>{METRICS.map(m=><button key={m.k} className={`pill${active.includes(m.k)?" on":""}`} onClick={()=>toggle(m.k)} style={{borderColor:active.includes(m.k)?m.c+"60":"",color:active.includes(m.k)?m.c:""}}>{m.l}</button>)}</div>
       </div>
       <ResponsiveContainer width="100%" height={190}>
         <LineChart data={data} margin={{left:-10,right:-10,top:4,bottom:0}}>
@@ -323,13 +299,8 @@ function CreativeCard({cr,rank,maxVal,sortM}){
 }
 
 function AccountSwitcher({accounts,activeId,onSwitch,onAdd,onRemove}){
-  const [open,setOpen]=useState(false);
-  const ref=useRef(null);
-  const active=accounts.find(a=>a.id===activeId);
-  useEffect(()=>{
-    const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
-    document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);
-  },[]);
+  const [open,setOpen]=useState(false);const ref=useRef(null);const active=accounts.find(a=>a.id===activeId);
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener("mousedown",h);return()=>document.removeEventListener("mousedown",h);},[]);
   return(
     <div ref={ref} style={{position:"relative"}}>
       <button onClick={()=>setOpen(p=>!p)} style={{display:"flex",alignItems:"center",gap:6,background:T.s1,border:`1px solid ${T.border}`,color:T.text,padding:"5px 10px",borderRadius:7,cursor:"pointer",fontSize:12,fontFamily:"'JetBrains Mono',monospace",transition:"all 0.15s"}}>
@@ -342,17 +313,12 @@ function AccountSwitcher({accounts,activeId,onSwitch,onAdd,onRemove}){
           {accounts.length===0&&<p style={{fontSize:11,color:T.muted,padding:"8px 12px",fontFamily:"'JetBrains Mono',monospace"}}>Nenhuma conta salva</p>}
           {accounts.map(a=>(
             <div key={a.id} className="dd-item" onClick={()=>{onSwitch(a.id);setOpen(false);}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{width:5,height:5,borderRadius:"50%",background:a.id===activeId?T.accent:T.muted}}/>
-                <span style={{color:a.id===activeId?T.accent:T.text,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>{a.name}</span>
-              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:5,height:5,borderRadius:"50%",background:a.id===activeId?T.accent:T.muted}}/><span style={{color:a.id===activeId?T.accent:T.text,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>{a.name}</span></div>
               <button onClick={e=>{e.stopPropagation();onRemove(a.id);}} style={{background:"transparent",border:"none",color:T.muted,cursor:"pointer",padding:2,display:"flex"}}><Ic.trash/></button>
             </div>
           ))}
           <div style={{height:1,background:T.border,margin:"5px 0"}}/>
-          <div className="dd-item" onClick={()=>{onAdd();setOpen(false);}}>
-            <div style={{display:"flex",alignItems:"center",gap:7,color:T.sub}}><Ic.plus/><span style={{fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>Adicionar conta</span></div>
-          </div>
+          <div className="dd-item" onClick={()=>{onAdd();setOpen(false);}}><div style={{display:"flex",alignItems:"center",gap:7,color:T.sub}}><Ic.plus/><span style={{fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>Adicionar conta</span></div></div>
         </div>
       )}
     </div>
@@ -382,9 +348,7 @@ function Login({onDemo,onConnect}){
             onMouseEnter={e=>{e.currentTarget.style.background=T.accent+"20";e.currentTarget.style.borderColor=T.accent;}}
             onMouseLeave={e=>{e.currentTarget.style.background=T.accentD;e.currentTarget.style.borderColor=T.accentM;}}
           >Entrar com dados de demo</button>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{flex:1,height:1,background:T.border}}/><span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>ou</span><div style={{flex:1,height:1,background:T.border}}/>
-          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{flex:1,height:1,background:T.border}}/><span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>ou</span><div style={{flex:1,height:1,background:T.border}}/></div>
           <button onClick={onConnect} style={{width:"100%",padding:"12px",borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.text,cursor:"pointer",fontSize:13,fontWeight:600,transition:"all 0.2s"}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=T.b2;e.currentTarget.style.background=T.s2;}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.background="transparent";}}
@@ -398,9 +362,7 @@ function Login({onDemo,onConnect}){
 }
 
 function Config({onSave,onClose}){
-  const [name,setName]=useState("");
-  const [tok,setTok]=useState("");
-  const [acc,setAcc]=useState("");
+  const [name,setName]=useState("");const [tok,setTok]=useState("");const [acc,setAcc]=useState("");
   const inp={width:"100%",padding:"10px 12px",borderRadius:8,background:T.bg,border:`1px solid ${T.border}`,color:T.text,fontSize:12,fontFamily:"'JetBrains Mono',monospace",outline:"none"};
   const lbl={display:"block",fontSize:10,color:T.sub,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.09em",fontFamily:"'JetBrains Mono',monospace"};
   const save=()=>{if(!name||!tok||!acc)return;onSave({id:Date.now().toString(),name,token:tok,accountId:acc.replace("act_","")});};
@@ -435,6 +397,7 @@ export default function App(){
   const [tab,setTab]=useState("overview");
   const [dateRange,setDR]=useState("last_7d");
   const [loading,setLoading]=useState(false);
+  const [loadMsg,setLoadMsg]=useState("Carregando dados...");
   const [error,setError]=useState(null);
   const [ov,setOv]=useState(null);
   const [ovPrev,setOvPrev]=useState(null);
@@ -461,9 +424,10 @@ export default function App(){
     setLoading(true);setError(null);
     try{
       const dp=getDP(dateRange),pdp=getPrevDP(dateRange);
-      const tr=JSON.stringify({since:dp.since,until:dp.until}),ptr=JSON.stringify({since:pdp.since,until:pdp.until});
+      const tr=JSON.stringify({since:dp.since,until:dp.until});
+      const ptr=JSON.stringify({since:pdp.since,until:pdp.until});
 
-      // Overview atual + anterior
+      setLoadMsg("Carregando visão geral...");
       const [ovR,ovPR]=await Promise.all([
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:tr,level:"account"},token),
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:ptr,level:"account"},token),
@@ -471,7 +435,6 @@ export default function App(){
       setOv(ovR.data?.[0]||null);
       setOvPrev(ovPR.data?.[0]||null);
 
-      // Gráfico diário
       const dR=await fetchM(`act_${accountId}/insights`,{fields:"spend,impressions,clicks,ctr,actions,action_values",time_range:tr,level:"account",time_increment:1},token);
       setDaily((dR.data||[]).map(d=>({
         date:d.date_start?.slice(5).replace("-","/"),
@@ -481,7 +444,7 @@ export default function App(){
         clicks:parseInt(d.clicks)||0,
       })));
 
-      // Campanhas com effective_status
+      setLoadMsg("Carregando campanhas...");
       const cs=await fetchPages(`act_${accountId}/campaigns`,{fields:"id,name,status,effective_status,objective"},token);
       const ci=await Promise.all(cs.map(async c=>{
         try{const r=await fetchM(`${c.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...c,effective_status:c.effective_status||c.status,insights:r.data?.[0]||null};}
@@ -489,7 +452,7 @@ export default function App(){
       }));
       setCamps(ci);
 
-      // Conjuntos com effective_status
+      setLoadMsg("Carregando conjuntos...");
       const as=await fetchPages(`act_${accountId}/adsets`,{fields:"id,name,status,effective_status,campaign_id,campaign{name}"},token);
       const asi=await Promise.all(as.map(async a=>{
         try{const r=await fetchM(`${a.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...a,campaign:a.campaign?.name||"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:r.data?.[0]||null};}
@@ -497,70 +460,79 @@ export default function App(){
       }));
       setAdsets(asi);
 
-      // ─── CRIATIVOS: busca anúncios + criativo separado pelo endpoint do creative_id ───
-      // Passo 1: busca todos os anúncios com apenas o creative.id (sem campos extras)
-      const ads=await fetchPages(`act_${accountId}/ads`,{
-        fields:"id,name,status,effective_status,campaign_id,creative{id}",
-      },token);
+      // ─── CRIATIVOS: abordagem em 3 etapas ────────────────────────────────────
+      setLoadMsg("Buscando anúncios...");
 
-      // Passo 2: para cada anúncio, busca insights E criativo em paralelo
-      const adsI=await Promise.all(ads.slice(0,60).map(async ad=>{
-        try{
-          // Busca insights e creative em paralelo
-          const insPromise=fetchM(`${ad.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token).catch(()=>({data:[]}));
-          const creativeId=ad.creative?.id;
-          const crPromise=creativeId
-            ?fetchM(creativeId,{fields:CR_FIELDS},token).catch(()=>({}))
-            :Promise.resolve({});
-          const [insR,crDetails]=await Promise.all([insPromise,crPromise]);
+      // ETAPA 1: Busca todos os anúncios com todos os status + creative inline
+      // Inclui os campos do criativo diretamente para evitar uma chamada separada
+      const adFields = [
+        "id","name","status","effective_status","campaign_id",
+        `creative{id,${CR_FIELDS}}`,
+      ].join(",");
 
-          const camp=ci.find(c=>c.id===ad.campaign_id);
+      const ads = await fetchPages(`act_${accountId}/ads`, {
+        fields: adFields,
+        effective_status: ALL_AD_STATUSES,
+      }, token);
 
-          // Detecta formato pelo conteúdo real do criativo
-          const isVideo=!!(crDetails.video_id||crDetails.object_story_spec?.video_data);
-          const isCarousel=!!(crDetails.object_story_spec?.link_data?.child_attachments?.length);
-          const format=isVideo?"Vídeo":isCarousel?"Carrossel":"Imagem";
+      setLoadMsg(`Buscando insights de ${ads.length} anúncios...`);
 
-          // Tenta todas as fontes possíveis de thumbnail
-          const thumb=
-            crDetails.thumbnail_url||
-            crDetails.image_url||
-            crDetails.object_story_spec?.link_data?.picture||
-            crDetails.object_story_spec?.video_data?.image_url||
-            crDetails.asset_feed_spec?.images?.[0]?.url||
-            null;
+      // ETAPA 2: Busca insights de TODOS os anúncios em uma única chamada batch
+      // Muito mais eficiente — 1 chamada em vez de N chamadas
+      const adInsightsMap = await fetchAllAdInsights(accountId, tr, token);
 
-          // Tenta todas as fontes possíveis de título
-          const title=
-            crDetails.title||
-            crDetails.object_story_spec?.link_data?.name||
-            crDetails.object_story_spec?.video_data?.title||
-            crDetails.asset_feed_spec?.titles?.[0]?.text||
-            ad.name||"";
+      setLoadMsg("Montando criativos...");
 
-          const body=
-            crDetails.body||
-            crDetails.object_story_spec?.link_data?.description||
-            crDetails.asset_feed_spec?.bodies?.[0]?.text||"";
+      // ETAPA 3: Monta o objeto criativo combinando dados do anúncio + insights
+      const adsBuilt = ads.map(ad => {
+        const cr = ad.creative || {};
+        const insights = adInsightsMap[ad.id] || null;
+        const camp = ci.find(c => c.id === ad.campaign_id);
 
-          return{
-            id:ad.id,
-            name:ad.name,
-            cid:ad.campaign_id,
-            campaign:camp?.name||"",
-            status:ad.effective_status||ad.status,
-            format,
-            thumb,
-            title,
-            body,
-            grad:GRAD[Math.floor(Math.random()*GRAD.length)],
-            insights:insR.data?.[0]||null,
-          };
-        }catch{return null;}
-      }));
-      setCreatives(adsI.filter(Boolean));
+        const isVideo = !!(cr.video_id || cr.object_story_spec?.video_data);
+        const isCarousel = !!(cr.object_story_spec?.link_data?.child_attachments?.length);
+        const format = isVideo ? "Vídeo" : isCarousel ? "Carrossel" : "Imagem";
 
-    }catch(e){setError(e.message);}finally{setLoading(false);}
+        const thumb =
+          cr.thumbnail_url ||
+          cr.image_url ||
+          cr.object_story_spec?.link_data?.picture ||
+          cr.object_story_spec?.video_data?.image_url ||
+          cr.asset_feed_spec?.images?.[0]?.url ||
+          null;
+
+        const title =
+          cr.title ||
+          cr.object_story_spec?.link_data?.name ||
+          cr.object_story_spec?.video_data?.title ||
+          cr.asset_feed_spec?.titles?.[0]?.text ||
+          ad.name || "";
+
+        const body =
+          cr.body ||
+          cr.object_story_spec?.link_data?.description ||
+          cr.asset_feed_spec?.bodies?.[0]?.text || "";
+
+        return {
+          id: ad.id,
+          name: ad.name,
+          cid: ad.campaign_id,
+          campaign: camp?.name || "",
+          status: ad.effective_status || ad.status,
+          format,
+          thumb,
+          title,
+          body,
+          grad: GRAD[Math.floor(Math.random() * GRAD.length)],
+          insights,
+        };
+      });
+
+      // Mostra todos os anúncios, ordenados por gasto (com insights primeiro)
+      adsBuilt.sort((a,b)=>(parseFloat(b.insights?.spend)||0)-(parseFloat(a.insights?.spend)||0));
+      setCreatives(adsBuilt.slice(0,80));
+
+    }catch(e){setError(e.message);}finally{setLoading(false);setLoadMsg("Carregando dados...");}
   },[isDemo,activeAcc,dateRange]);
 
   useEffect(()=>{if(screen==="dashboard")fetchData();},[fetchData,screen]);
@@ -591,7 +563,10 @@ export default function App(){
     });
 
   const getCreativeVal=cr=>{if(!cr.insights)return 0;switch(crSort){case"roas":{const r=gA(cr.insights.action_values,"purchase"),s=parseFloat(cr.insights.spend)||1;return r/s;}case"ctr":return parseFloat(cr.insights.ctr)||0;default:return parseFloat(cr.insights.spend)||0;}};
-  const filteredCr=[...creatives].filter(c=>crFmt==="all"||c.format===crFmt).filter(c=>!crSearch||c.name.toLowerCase().includes(crSearch.toLowerCase())||c.campaign.toLowerCase().includes(crSearch.toLowerCase())).sort((a,b)=>getCreativeVal(b)-getCreativeVal(a));
+  const filteredCr=[...creatives]
+    .filter(c=>crFmt==="all"||c.format===crFmt)
+    .filter(c=>!crSearch||c.name.toLowerCase().includes(crSearch.toLowerCase())||c.campaign.toLowerCase().includes(crSearch.toLowerCase()))
+    .sort((a,b)=>getCreativeVal(b)-getCreativeVal(a));
   const maxCreativeVal=filteredCr.length>0?getCreativeVal(filteredCr[0]):1;
 
   const srt=k=>{if(sortKey===k)setSD(d=>d==="desc"?"asc":"desc");else{setSK(k);setSD("desc");}};
@@ -638,9 +613,10 @@ export default function App(){
       </div>
 
       <main style={{padding:"22px 24px 48px",animation:"fadeUp 0.3s ease"}}>
-        {loading?<Spinner/>:error?(
+        {loading?<Spinner msg={loadMsg}/>:error?(
           <div style={{background:T.red+"12",border:`1px solid ${T.red}28`,borderRadius:10,padding:20,color:T.red,fontSize:13}}>
-            <strong>Erro:</strong> {error}<p style={{marginTop:6,fontSize:11,color:T.sub}}>Verifique o token e o ID da conta.</p>
+            <strong>Erro:</strong> {error}
+            <p style={{marginTop:6,fontSize:11,color:T.sub}}>Verifique o token e o ID da conta.</p>
           </div>
         ):tab==="overview"?(
           <>
@@ -680,8 +656,7 @@ export default function App(){
                   <thead><tr style={{background:T.bg+"88"}}>{thS("name","Campanha",false)}{thS("spend","Gasto")}{thS("ctr","CTR")}{thS("roas","ROAS")}<th style={{padding:"10px 16px",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",textAlign:"left"}}>Alertas</th></tr></thead>
                   <tbody>
                     {[...camps].filter(c=>c.insights).sort((a,b)=>(parseFloat(b.insights?.spend)||0)-(parseFloat(a.insights?.spend)||0)).slice(0,5).map(c=>{
-                      const s=parseFloat(c.insights?.spend)||0,rv=gA(c.insights?.action_values,"purchase"),cr=s>0?rv/s:0;
-                      const al=getAlerts(c,avgCpc);
+                      const s=parseFloat(c.insights?.spend)||0,rv=gA(c.insights?.action_values,"purchase"),cr=s>0?rv/s:0;const al=getAlerts(c,avgCpc);
                       return(<tr key={c.id} className="rh" style={{transition:"background 0.15s"}}>
                         <td style={{...tdS,maxWidth:260}}><p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13}}>{c.name}</p></td>
                         <td style={{...tdS,color:T.accent}}>{brl(c.insights?.spend)}</td>
@@ -701,9 +676,7 @@ export default function App(){
               <span style={{fontSize:13,fontWeight:600}}>Campanhas <span style={{color:T.sub,fontWeight:400,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>({sortedCamps.length})</span></span>
               <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
                 <input value={campSearch} onChange={e=>setCSearch(e.target.value)} placeholder="Buscar..." style={{background:T.bg,border:`1px solid ${T.border}`,color:T.text,padding:"6px 10px",borderRadius:7,fontSize:12,outline:"none",width:155,fontFamily:"'JetBrains Mono',monospace"}}/>
-                <div style={{display:"flex",gap:4}}>
-                  {["all","ACTIVE","PAUSED","ARCHIVED"].map(s=><button key={s} className={`pill${campStatus===s?" on":""}`} onClick={()=>setCStat(s)}>{s==="all"?"Todas":s==="ACTIVE"?"Ativas":s==="PAUSED"?"Pausadas":"Arquivadas"}</button>)}
-                </div>
+                <div style={{display:"flex",gap:4}}>{["all","ACTIVE","PAUSED","ARCHIVED"].map(s=><button key={s} className={`pill${campStatus===s?" on":""}`} onClick={()=>setCStat(s)}>{s==="all"?"Todas":s==="ACTIVE"?"Ativas":s==="PAUSED"?"Pausadas":"Arquivadas"}</button>)}</div>
               </div>
             </div>
             <div style={{overflowX:"auto"}}>
@@ -712,9 +685,7 @@ export default function App(){
                 <tbody>
                   {sortedCamps.length===0?<tr><td colSpan={9} style={{...tdS,textAlign:"center",padding:"48px",color:T.muted}}>Nenhuma campanha encontrada</td></tr>
                     :sortedCamps.map(c=>{
-                      const ins=c.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0;
-                      const al=getAlerts(c,avgCpc);
-                      const es=c.effective_status||c.status;
+                      const ins=c.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0;const al=getAlerts(c,avgCpc);const es=c.effective_status||c.status;
                       return(<tr key={c.id} className="rh" style={{transition:"background 0.15s"}}>
                         <td style={{...tdS,maxWidth:260}}><p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{c.name}</p><p style={{fontSize:10,color:T.muted,marginTop:2}}>{c.objective||"—"}</p></td>
                         <td style={tdS}><Badge color={statusColor(es)}>{statusLabel(es)}</Badge></td>
@@ -735,36 +706,24 @@ export default function App(){
         ):tab==="adsets"?(
           <div style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
             <div style={{padding:"13px 18px",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
-              <span style={{fontSize:13,fontWeight:600}}>Conjuntos de anúncios <span style={{color:T.sub,fontWeight:400,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>({adsets.filter(a=>!asSearch||a.name.toLowerCase().includes(asSearch.toLowerCase())).length})</span></span>
+              <span style={{fontSize:13,fontWeight:600}}>Conjuntos <span style={{color:T.sub,fontWeight:400,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>({adsets.filter(a=>!asSearch||a.name.toLowerCase().includes(asSearch.toLowerCase())).length})</span></span>
               <input value={asSearch} onChange={e=>setAsSearch(e.target.value)} placeholder="Buscar conjunto..." style={{background:T.bg,border:`1px solid ${T.border}`,color:T.text,padding:"6px 10px",borderRadius:7,fontSize:12,outline:"none",width:190,fontFamily:"'JetBrains Mono',monospace"}}/>
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse"}}>
                 <thead><tr style={{background:T.bg+"88"}}>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",minWidth:220}}>Conjunto</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Status Real</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Gasto</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Cliques</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>CTR</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>CPC</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Freq.</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>ROAS</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Alertas</th>
+                  {["Conjunto","Status Real","Gasto","Cliques","CTR","CPC","Freq.","ROAS","Alertas"].map(h=><th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",minWidth:h==="Conjunto"?220:"auto"}}>{h}</th>)}
                 </tr></thead>
                 <tbody>
                   {adsets.filter(a=>!asSearch||a.name.toLowerCase().includes(asSearch.toLowerCase())).map(a=>{
                     const ins=a.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0;
-                    const freq=parseFloat(ins?.frequency)||0;
-                    const es=a.effective_status||a.status;
+                    const freq=parseFloat(ins?.frequency)||0;const es=a.effective_status||a.status;
                     const als=[];
                     if(parseFloat(ins?.ctr)>0&&parseFloat(ins?.ctr)<1)als.push({c:"warn",l:"CTR baixo"});
                     if(freq>=4)als.push({c:"freq",l:`Freq ${freq.toFixed(1)}x`});
                     else if(freq>=3)als.push({c:"freq",l:`Freq ${freq.toFixed(1)}x`});
                     return(<tr key={a.id} className="rh" style={{transition:"background 0.15s"}}>
-                      <td style={{...tdS,maxWidth:260}}>
-                        <p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{a.name}</p>
-                        <p style={{fontSize:10,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.campaign}</p>
-                      </td>
+                      <td style={{...tdS,maxWidth:260}}><p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{a.name}</p><p style={{fontSize:10,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.campaign}</p></td>
                       <td style={tdS}><Badge color={statusColor(es)}>{statusLabel(es)}</Badge></td>
                       <td style={{...tdS,color:T.accent,fontWeight:600}}>{ins?brl(ins.spend):"—"}</td>
                       <td style={tdS}>{ins?num(ins.clicks):"—"}</td>
@@ -782,7 +741,10 @@ export default function App(){
         ):(
           <>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-              <span style={{fontSize:13,fontWeight:600}}>Criativos <span style={{color:T.sub,fontWeight:400,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>({filteredCr.length})</span></span>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:13,fontWeight:600}}>Criativos</span>
+                <span style={{fontSize:12,color:T.sub,fontFamily:"'JetBrains Mono',monospace"}}>({filteredCr.length} exibindo / {creatives.length} total)</span>
+              </div>
               <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>Rank por</span>
@@ -793,12 +755,18 @@ export default function App(){
                 <input value={crSearch} onChange={e=>setCrSearch(e.target.value)} placeholder="Buscar..." style={{background:T.s1,border:`1px solid ${T.border}`,color:T.text,padding:"6px 10px",borderRadius:7,fontSize:12,outline:"none",width:150,fontFamily:"'JetBrains Mono',monospace"}}/>
               </div>
             </div>
-            {filteredCr.length===0
-              ?<div style={{textAlign:"center",padding:"60px",color:T.muted,fontFamily:"'JetBrains Mono',monospace",fontSize:12}}>Nenhum criativo encontrado</div>
-              :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(255px,1fr))",gap:12}}>
+            {filteredCr.length===0?(
+              <div style={{textAlign:"center",padding:"60px",color:T.muted,fontFamily:"'JetBrains Mono',monospace",fontSize:12}}>
+                {creatives.length===0
+                  ?"Nenhum anúncio encontrado nessa conta para o período selecionado"
+                  :"Nenhum criativo corresponde ao filtro"
+                }
+              </div>
+            ):(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(255px,1fr))",gap:12}}>
                 {filteredCr.map((cr,i)=><CreativeCard key={cr.id} cr={cr} rank={i+1} maxVal={maxCreativeVal} sortM={crSort}/>)}
               </div>
-            }
+            )}
           </>
         )}
         <div style={{marginTop:24,textAlign:"center",fontSize:9,color:T.muted,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.06em"}}>
