@@ -6,6 +6,13 @@ const BASE = `https://graph.facebook.com/${API_V}`;
 const INS_F = "spend,impressions,clicks,ctr,cpc,cpm,reach,frequency,actions,action_values";
 const ALL_AD_STATUSES = JSON.stringify(["ACTIVE","PAUSED","ARCHIVED","CAMPAIGN_PAUSED","ADSET_PAUSED","WITH_ISSUES"]);
 
+// Parâmetros que fazem a API retornar os mesmos números que o Gerenciador
+// Gerenciador usa 7d_click + 1d_view por padrão com unified attribution
+const ATTR = {
+  action_attribution_windows: JSON.stringify(["7d_click","1d_view"]),
+  use_unified_attribution_setting: "true",
+};
+
 // Todos os action_types que o Meta conta como "lead" no Gerenciador
 const LEAD_TYPES = [
   "lead",
@@ -102,7 +109,7 @@ async function fetchPages(path,params,token){
 }
 async function fetchAllAdInsights(accountId,tr,token){
   const map={};
-  try{let cursor=null;do{const params={fields:INS_F+",frequency,ad_id",time_range:tr,level:"ad",limit:500};if(cursor)params.after=cursor;const d=await fetchM(`act_${accountId}/insights`,params,token);(d.data||[]).forEach(ins=>{map[ins.ad_id]=ins;});cursor=d.paging?.cursors?.after;if(!d.paging?.next)cursor=null;}while(cursor);}catch(e){console.warn("adInsights:",e.message);}
+  try{let cursor=null;do{const params={fields:INS_F+",frequency,ad_id",time_range:tr,level:"ad",limit:500,...ATTR};if(cursor)params.after=cursor;const d=await fetchM(`act_${accountId}/insights`,params,token);(d.data||[]).forEach(ins=>{map[ins.ad_id]=ins;});cursor=d.paging?.cursors?.after;if(!d.paging?.next)cursor=null;}while(cursor);}catch(e){console.warn("adInsights:",e.message);}
   return map;
 }
 const CR_FIELDS=["thumbnail_url","image_url","title","body","call_to_action_type","video_id","object_story_spec{link_data{picture,child_attachments,name,description},video_data{image_url,title}}","asset_feed_spec{images,videos,titles,bodies}"].join(",");
@@ -604,25 +611,25 @@ export default function App(){
 
       setLoadMsg("Carregando visão geral...");
       const [ovR,ovPR]=await Promise.all([
-        fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:tr,level:"account"},token),
-        fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:ptr,level:"account"},token),
+        fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:tr,level:"account",...ATTR},token),
+        fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:ptr,level:"account",...ATTR},token),
       ]);
       setOv(ovR.data?.[0]||null);setOvPrev(ovPR.data?.[0]||null);
 
-      const dR=await fetchM(`act_${accountId}/insights`,{fields:"spend,impressions,clicks,ctr,actions,action_values",time_range:tr,level:"account",time_increment:1},token);
+      const dR=await fetchM(`act_${accountId}/insights`,{fields:"spend,impressions,clicks,ctr,actions,action_values",time_range:tr,level:"account",time_increment:1,...ATTR},token);
       setDaily((dR.data||[]).map(d=>({date:d.date_start?.slice(5).replace("-","/"),spend:parseFloat(d.spend)||0,roas:(()=>{const rv=gA(d.action_values,"purchase"),s=parseFloat(d.spend)||1;return +(rv/s).toFixed(2);})(),ctr:parseFloat(d.ctr)||0,clicks:parseInt(d.clicks)||0})));
 
       setLoadMsg("Carregando campanhas...");
       const cs=await fetchPages(`act_${accountId}/campaigns`,{fields:"id,name,status,effective_status,objective"},token);
       const campInsMap={};
-      try{const r=await fetchM(`act_${accountId}/insights`,{fields:INS_F+",frequency,campaign_id",time_range:tr,level:"campaign",limit:500},token);(r.data||[]).forEach(ins=>{campInsMap[ins.campaign_id]=ins;});}catch(e){console.warn("campIns:",e.message);}
+      try{const r=await fetchM(`act_${accountId}/insights`,{fields:INS_F+",frequency,campaign_id",time_range:tr,level:"campaign",limit:500,...ATTR},token);(r.data||[]).forEach(ins=>{campInsMap[ins.campaign_id]=ins;});}catch(e){console.warn("campIns:",e.message);}
       const ci=cs.map(c=>({...c,effective_status:c.effective_status||c.status,insights:campInsMap[c.id]||null}));
       setCamps(ci);
 
       setLoadMsg("Carregando conjuntos...");
       const as=await fetchPages(`act_${accountId}/adsets`,{fields:"id,name,status,effective_status,campaign_id,campaign{name}"},token);
       const adsetInsMap={};
-      try{const r=await fetchM(`act_${accountId}/insights`,{fields:INS_F+",frequency,adset_id",time_range:tr,level:"adset",limit:500},token);(r.data||[]).forEach(ins=>{adsetInsMap[ins.adset_id]=ins;});}catch(e){console.warn("adsetIns:",e.message);}
+      try{const r=await fetchM(`act_${accountId}/insights`,{fields:INS_F+",frequency,adset_id",time_range:tr,level:"adset",limit:500,...ATTR},token);(r.data||[]).forEach(ins=>{adsetInsMap[ins.adset_id]=ins;});}catch(e){console.warn("adsetIns:",e.message);}
       const asi=as.map(a=>({...a,campaign:a.campaign?.name||"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:adsetInsMap[a.id]||null}));
       setAdsets(asi);
 
