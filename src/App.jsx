@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const API_V = "v19.0";
 const BASE = `https://graph.facebook.com/${API_V}`;
 const INS_F = "spend,impressions,clicks,ctr,cpc,cpm,reach,frequency,actions,action_values";
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
   bg:"#06070A", s1:"#0C0D12", s2:"#111318", border:"#1C1E26", b2:"#252830",
   accent:"#C8FF57", accentD:"#C8FF5712", accentM:"#C8FF5732",
@@ -14,7 +12,6 @@ const T = {
   red:"#FF5757", green:"#57FF8A", blue:"#5799FF", orange:"#FF9A3C",
 };
 
-// ─── Demo daily data (30 days) ────────────────────────────────────────────────
 const RAW_DAILY = [
   {spend:2340,roas:3.2,ctr:2.8,clicks:5120},{spend:1890,roas:3.8,ctr:3.1,clicks:4310},
   {spend:2180,roas:3.4,ctr:3.4,clicks:5480},{spend:2420,roas:2.9,ctr:2.6,clicks:4890},
@@ -42,7 +39,6 @@ function getDailyDemo(range) {
   });
 }
 
-// ─── Demo data ────────────────────────────────────────────────────────────────
 const D_OV = {
   spend:"14832.50",impressions:"1284930",clicks:"38274",
   ctr:"2.98",cpc:"0.39",cpm:"11.54",reach:"897210",frequency:"1.43",
@@ -56,24 +52,24 @@ const D_OV_PREV = {
   action_values:[{action_type:"purchase",value:"43830.00"}],
 };
 const D_CAMPS = [
-  {id:"c1",name:"DOF | Ótica Premium | Conversão | Quente",status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"3820.00",impressions:"312400",clicks:"9840",ctr:"3.15",cpc:"0.39",cpm:"12.23",reach:"218000",frequency:"2.1",actions:[{action_type:"purchase",value:"98"}],action_values:[{action_type:"purchase",value:"14700.00"}]}},
-  {id:"c2",name:"DL Consórcios | Prospecção | Leads Qualificados",status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"2940.00",impressions:"198700",clicks:"7210",ctr:"3.63",cpc:"0.41",cpm:"14.79",reach:"162000",frequency:"1.6",actions:[{action_type:"lead",value:"420"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"c3",name:"DOF | Remarketing 30d | Catálogo Dinâmico",status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"1650.00",impressions:"84200",clicks:"4320",ctr:"5.13",cpc:"0.38",cpm:"19.60",reach:"54200",frequency:"4.4",actions:[{action_type:"purchase",value:"74"}],action_values:[{action_type:"purchase",value:"13320.00"}]}},
-  {id:"c4",name:"DL Consórcios | Imóveis | Lookalike 3%",status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"2180.00",impressions:"224000",clicks:"5940",ctr:"2.65",cpc:"0.37",cpm:"9.73",reach:"192000",frequency:"1.8",actions:[{action_type:"lead",value:"310"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"c5",name:"DOF | Topo de Funil | Interesses Amplos",status:"PAUSED",objective:"OUTCOME_AWARENESS",insights:{spend:"980.00",impressions:"198400",clicks:"1680",ctr:"0.85",cpc:"0.58",cpm:"4.94",reach:"162000",frequency:"2.3",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"c6",name:"DL Consórcios | Veículos | Público Amplo",status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"1840.00",impressions:"142000",clicks:"4210",ctr:"2.96",cpc:"0.44",cpm:"12.96",reach:"98000",frequency:"2.0",actions:[{action_type:"lead",value:"110"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"c7",name:"DOF | Black Friday | Engajamento",status:"PAUSED",objective:"OUTCOME_ENGAGEMENT",insights:{spend:"620.00",impressions:"84230",clicks:"1940",ctr:"2.30",cpc:"0.32",cpm:"7.36",reach:"71000",frequency:"3.9",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"c8",name:"Teste A/B | Vídeo vs Carrossel",status:"ARCHIVED",objective:"OUTCOME_SALES",insights:null},
+  {id:"c1",name:"DOF | Ótica Premium | Conversão | Quente",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"3820.00",impressions:"312400",clicks:"9840",ctr:"3.15",cpc:"0.39",cpm:"12.23",reach:"218000",frequency:"2.1",actions:[{action_type:"purchase",value:"98"}],action_values:[{action_type:"purchase",value:"14700.00"}]}},
+  {id:"c2",name:"DL Consórcios | Prospecção | Leads Qualificados",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"2940.00",impressions:"198700",clicks:"7210",ctr:"3.63",cpc:"0.41",cpm:"14.79",reach:"162000",frequency:"1.6",actions:[{action_type:"lead",value:"420"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"c3",name:"DOF | Remarketing 30d | Catálogo Dinâmico",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_SALES",insights:{spend:"1650.00",impressions:"84200",clicks:"4320",ctr:"5.13",cpc:"0.38",cpm:"19.60",reach:"54200",frequency:"4.4",actions:[{action_type:"purchase",value:"74"}],action_values:[{action_type:"purchase",value:"13320.00"}]}},
+  {id:"c4",name:"DL Consórcios | Imóveis | Lookalike 3%",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"2180.00",impressions:"224000",clicks:"5940",ctr:"2.65",cpc:"0.37",cpm:"9.73",reach:"192000",frequency:"1.8",actions:[{action_type:"lead",value:"310"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"c5",name:"DOF | Topo de Funil | Interesses Amplos",status:"PAUSED",effective_status:"PAUSED",objective:"OUTCOME_AWARENESS",insights:{spend:"980.00",impressions:"198400",clicks:"1680",ctr:"0.85",cpc:"0.58",cpm:"4.94",reach:"162000",frequency:"2.3",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"c6",name:"DL Consórcios | Veículos | Público Amplo",status:"ACTIVE",effective_status:"ACTIVE",objective:"OUTCOME_LEADS",insights:{spend:"1840.00",impressions:"142000",clicks:"4210",ctr:"2.96",cpc:"0.44",cpm:"12.96",reach:"98000",frequency:"2.0",actions:[{action_type:"lead",value:"110"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"c7",name:"DOF | Black Friday | Engajamento",status:"PAUSED",effective_status:"PAUSED",objective:"OUTCOME_ENGAGEMENT",insights:{spend:"620.00",impressions:"84230",clicks:"1940",ctr:"2.30",cpc:"0.32",cpm:"7.36",reach:"71000",frequency:"3.9",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"c8",name:"Teste A/B | Vídeo vs Carrossel",status:"ARCHIVED",effective_status:"ARCHIVED",objective:"OUTCOME_SALES",insights:null},
 ];
 const D_ADSETS = [
-  {id:"as1",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Engajamentos 180d — Interesses Óculos",status:"ACTIVE",insights:{spend:"1820.00",impressions:"142000",clicks:"4890",ctr:"3.44",cpc:"0.37",cpm:"12.82",reach:"98000",frequency:"2.1",actions:[{action_type:"purchase",value:"48"}],action_values:[{action_type:"purchase",value:"7200.00"}]}},
-  {id:"as2",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Compradores 60d — Lookalike 2%",status:"ACTIVE",insights:{spend:"2000.00",impressions:"170400",clicks:"4950",ctr:"2.90",cpc:"0.40",cpm:"11.74",reach:"120000",frequency:"1.8",actions:[{action_type:"purchase",value:"50"}],action_values:[{action_type:"purchase",value:"7500.00"}]}},
-  {id:"as3",campaign:"DL Consórcios | Prospecção | Leads Qualificados",cid:"c2",name:"Lookalike 3% — Clientes Ativos",status:"ACTIVE",insights:{spend:"1240.00",impressions:"88000",clicks:"3200",ctr:"3.64",cpc:"0.39",cpm:"14.09",reach:"72000",frequency:"1.4",actions:[{action_type:"lead",value:"198"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"as4",campaign:"DL Consórcios | Prospecção | Leads Qualificados",cid:"c2",name:"Interesses Financeiros — Amplo",status:"ACTIVE",insights:{spend:"1700.00",impressions:"110700",clicks:"4010",ctr:"3.62",cpc:"0.42",cpm:"15.36",reach:"90000",frequency:"3.8",actions:[{action_type:"lead",value:"222"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"as5",campaign:"DOF | Remarketing 30d | Catálogo Dinâmico",cid:"c3",name:"Visitantes Site — Sem Compra",status:"ACTIVE",insights:{spend:"920.00",impressions:"48000",clicks:"2610",ctr:"5.44",cpc:"0.35",cpm:"19.17",reach:"28000",frequency:"4.9",actions:[{action_type:"purchase",value:"42"}],action_values:[{action_type:"purchase",value:"6300.00"}]}},
-  {id:"as6",campaign:"DL Consórcios | Imóveis | Lookalike 3%",cid:"c4",name:"Lookalike 3% — Leads Imóvel",status:"ACTIVE",insights:{spend:"1480.00",impressions:"148000",clicks:"3720",ctr:"2.51",cpc:"0.40",cpm:"10.00",reach:"110000",frequency:"1.6",actions:[{action_type:"lead",value:"198"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"as7",campaign:"DOF | Topo de Funil | Interesses Amplos",cid:"c5",name:"Interesses — Moda e Beleza",status:"PAUSED",insights:{spend:"480.00",impressions:"102000",clicks:"700",ctr:"0.69",cpc:"0.69",cpm:"4.71",reach:"84000",frequency:"2.1",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"as8",campaign:"DL Consórcios | Veículos | Público Amplo",cid:"c6",name:"Público Amplo 25–45 — Sudeste",status:"ACTIVE",insights:{spend:"1840.00",impressions:"142000",clicks:"4210",ctr:"2.96",cpc:"0.44",cpm:"12.96",reach:"98000",frequency:"2.3",actions:[{action_type:"lead",value:"110"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"as1",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Engajamentos 180d — Interesses Óculos",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1820.00",impressions:"142000",clicks:"4890",ctr:"3.44",cpc:"0.37",cpm:"12.82",reach:"98000",frequency:"2.1",actions:[{action_type:"purchase",value:"48"}],action_values:[{action_type:"purchase",value:"7200.00"}]}},
+  {id:"as2",campaign:"DOF | Ótica Premium | Conversão | Quente",cid:"c1",name:"Compradores 60d — Lookalike 2%",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"2000.00",impressions:"170400",clicks:"4950",ctr:"2.90",cpc:"0.40",cpm:"11.74",reach:"120000",frequency:"1.8",actions:[{action_type:"purchase",value:"50"}],action_values:[{action_type:"purchase",value:"7500.00"}]}},
+  {id:"as3",campaign:"DL Consórcios | Prospecção | Leads Qualificados",cid:"c2",name:"Lookalike 3% — Clientes Ativos",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1240.00",impressions:"88000",clicks:"3200",ctr:"3.64",cpc:"0.39",cpm:"14.09",reach:"72000",frequency:"1.4",actions:[{action_type:"lead",value:"198"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"as4",campaign:"DL Consórcios | Prospecção | Leads Qualificados",cid:"c2",name:"Interesses Financeiros — Amplo",status:"ACTIVE",effective_status:"CAMPAIGN_PAUSED",insights:{spend:"1700.00",impressions:"110700",clicks:"4010",ctr:"3.62",cpc:"0.42",cpm:"15.36",reach:"90000",frequency:"3.8",actions:[{action_type:"lead",value:"222"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"as5",campaign:"DOF | Remarketing 30d | Catálogo Dinâmico",cid:"c3",name:"Visitantes Site — Sem Compra",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"920.00",impressions:"48000",clicks:"2610",ctr:"5.44",cpc:"0.35",cpm:"19.17",reach:"28000",frequency:"4.9",actions:[{action_type:"purchase",value:"42"}],action_values:[{action_type:"purchase",value:"6300.00"}]}},
+  {id:"as6",campaign:"DL Consórcios | Imóveis | Lookalike 3%",cid:"c4",name:"Lookalike 3% — Leads Imóvel",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1480.00",impressions:"148000",clicks:"3720",ctr:"2.51",cpc:"0.40",cpm:"10.00",reach:"110000",frequency:"1.6",actions:[{action_type:"lead",value:"198"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"as7",campaign:"DOF | Topo de Funil | Interesses Amplos",cid:"c5",name:"Interesses — Moda e Beleza",status:"PAUSED",effective_status:"CAMPAIGN_PAUSED",insights:{spend:"480.00",impressions:"102000",clicks:"700",ctr:"0.69",cpc:"0.69",cpm:"4.71",reach:"84000",frequency:"2.1",actions:[{action_type:"purchase",value:"0"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"as8",campaign:"DL Consórcios | Veículos | Público Amplo",cid:"c6",name:"Público Amplo 25–45 — Sudeste",status:"ACTIVE",effective_status:"ACTIVE",insights:{spend:"1840.00",impressions:"142000",clicks:"4210",ctr:"2.96",cpc:"0.44",cpm:"12.96",reach:"98000",frequency:"2.3",actions:[{action_type:"lead",value:"110"}],action_values:[{action_type:"purchase",value:"0"}]}},
 ];
 const GRAD = [["#1A0533","#7C3AED"],["#03141F","#0EA5E9"],["#1A2700","#65A30D"],["#1F0A00","#EA580C"],["#170024","#DB2777"],["#001A1A","#0D9488"]];
 const D_CREATIVES = [
@@ -81,16 +77,17 @@ const D_CREATIVES = [
   {id:"cr2",cid:"c1",campaign:"DOF | Ótica Premium | Conversão | Quente",name:"30% OFF — Feed Carrossel",format:"Carrossel",thumb:null,grad:GRAD[1],title:"30% OFF em toda a coleção",insights:{spend:"980.00",impressions:"72000",clicks:"2840",ctr:"3.94",cpc:"0.35",frequency:"2.3",actions:[{action_type:"purchase",value:"28"}],action_values:[{action_type:"purchase",value:"4200.00"}]}},
   {id:"cr3",cid:"c3",campaign:"DOF | Remarketing 30d | Catálogo Dinâmico",name:"Catálogo Dinâmico — Remarketing",format:"Imagem",thumb:null,grad:GRAD[2],title:"Você viu esse produto",insights:{spend:"650.00",impressions:"31200",clicks:"1920",ctr:"6.15",cpc:"0.34",frequency:"4.8",actions:[{action_type:"purchase",value:"42"}],action_values:[{action_type:"purchase",value:"6300.00"}]}},
   {id:"cr4",cid:"c2",campaign:"DL Consórcios | Prospecção | Leads Qualificados",name:"Conquiste seu Imóvel — Vídeo 15s",format:"Vídeo",thumb:null,grad:GRAD[3],title:"Conquiste seu imóvel sem juros",insights:{spend:"1100.00",impressions:"82000",clicks:"2980",ctr:"3.63",cpc:"0.37",frequency:"1.4",actions:[{action_type:"lead",value:"184"}],action_values:[{action_type:"purchase",value:"0"}]}},
-  {id:"cr5",cid:"c2",campaign:"DL Consórcios | Prospecção | Leads Qualificados",name:"Depoimento Cliente — Stories",format:"Vídeo",thumb:null,grad:GRAD[4],title:"\"Realizei meu sonho com a DL\"",insights:{spend:"840.00",impressions:"61400",clicks:"2190",ctr:"3.57",cpc:"0.38",frequency:"1.8",actions:[{action_type:"lead",value:"140"}],action_values:[{action_type:"purchase",value:"0"}]}},
+  {id:"cr5",cid:"c2",campaign:"DL Consórcios | Prospecção | Leads Qualificados",name:"Depoimento Cliente — Stories",format:"Vídeo",thumb:null,grad:GRAD[4],title:"Realizei meu sonho com a DL",insights:{spend:"840.00",impressions:"61400",clicks:"2190",ctr:"3.57",cpc:"0.38",frequency:"1.8",actions:[{action_type:"lead",value:"140"}],action_values:[{action_type:"purchase",value:"0"}]}},
   {id:"cr6",cid:"c4",campaign:"DL Consórcios | Imóveis | Lookalike 3%",name:"Simulação Rápida — Feed Imagem",format:"Imagem",thumb:null,grad:GRAD[5],title:"Simule em 2 minutos",insights:{spend:"920.00",impressions:"94000",clicks:"2410",ctr:"2.56",cpc:"0.38",frequency:"1.6",actions:[{action_type:"lead",value:"148"}],action_values:[{action_type:"purchase",value:"0"}]}},
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 function getDP(range) {
   const t=new Date(), fmt=d=>d.toISOString().split("T")[0], sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
   switch(range){
-    case"today":return{since:fmt(t),until:fmt(t)};case"yesterday":{const d=sub(1);return{since:fmt(d),until:fmt(d)};}
-    case"last_7d":return{since:fmt(sub(7)),until:fmt(t)};case"last_14d":return{since:fmt(sub(14)),until:fmt(t)};
+    case"today":return{since:fmt(t),until:fmt(t)};
+    case"yesterday":{const d=sub(1);return{since:fmt(d),until:fmt(d)};}
+    case"last_7d":return{since:fmt(sub(7)),until:fmt(t)};
+    case"last_14d":return{since:fmt(sub(14)),until:fmt(t)};
     case"last_30d":return{since:fmt(sub(30)),until:fmt(t)};
     case"this_month":{const s=new Date(t.getFullYear(),t.getMonth(),1);return{since:fmt(s),until:fmt(t)};}
     case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}
@@ -100,33 +97,62 @@ function getDP(range) {
 function getPrevDP(range) {
   const t=new Date(), fmt=d=>d.toISOString().split("T")[0], sub=n=>{const d=new Date(t);d.setDate(d.getDate()-n);return d;};
   switch(range){
-    case"today":return{since:fmt(sub(1)),until:fmt(sub(1))};case"yesterday":return{since:fmt(sub(2)),until:fmt(sub(2))};
-    case"last_7d":return{since:fmt(sub(14)),until:fmt(sub(8))};case"last_14d":return{since:fmt(sub(28)),until:fmt(sub(15))};
+    case"today":return{since:fmt(sub(1)),until:fmt(sub(1))};
+    case"yesterday":return{since:fmt(sub(2)),until:fmt(sub(2))};
+    case"last_7d":return{since:fmt(sub(14)),until:fmt(sub(8))};
+    case"last_14d":return{since:fmt(sub(28)),until:fmt(sub(15))};
     case"last_30d":return{since:fmt(sub(60)),until:fmt(sub(31))};
     case"this_month":{const s=new Date(t.getFullYear(),t.getMonth()-1,1),e=new Date(t.getFullYear(),t.getMonth(),0);return{since:fmt(s),until:fmt(e)};}
     case"last_month":{const s=new Date(t.getFullYear(),t.getMonth()-2,1),e=new Date(t.getFullYear(),t.getMonth()-1,0);return{since:fmt(s),until:fmt(e)};}
     default:return{since:fmt(sub(1)),until:fmt(sub(1))};
   }
 }
+
 const brl=v=>(parseFloat(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const num=v=>(parseInt(v)||0).toLocaleString("pt-BR");
 const pct=v=>`${(parseFloat(v)||0).toFixed(2)}%`;
 const gA=(arr,t)=>{if(!arr)return 0;const a=arr.find(x=>x.action_type===t);return a?parseFloat(a.value):0;};
 const delta=(cur,prev)=>prev>0?((cur-prev)/prev)*100:null;
 
+// FIX: effective_status mapping
+function statusLabel(es) {
+  const map = {
+    ACTIVE:"ACTIVE", PAUSED:"PAUSED", DELETED:"DELETED", ARCHIVED:"ARCHIVED",
+    CAMPAIGN_PAUSED:"CAMP. PAUSADA", ADSET_PAUSED:"CONJUNTO PAUSADO",
+    IN_PROCESS:"EM PROCESSO", WITH_ISSUES:"COM PROBLEMAS",
+  };
+  return map[es] || es;
+}
+function statusColor(es) {
+  if(es==="ACTIVE") return "green";
+  if(es==="PAUSED"||es==="CAMPAIGN_PAUSED"||es==="ADSET_PAUSED") return "yellow";
+  if(es==="DELETED"||es==="ARCHIVED") return "gray";
+  if(es==="WITH_ISSUES"||es==="IN_PROCESS") return "blue";
+  return "gray";
+}
+
 async function fetchM(path,params,token){
-  const url=new URL(`${BASE}/${path}`);url.searchParams.set("access_token",token);
+  const url=new URL(`${BASE}/${path}`);
+  url.searchParams.set("access_token",token);
   Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
-  const r=await fetch(url.toString());const d=await r.json();
-  if(d.error)throw new Error(d.error.message);return d;
+  const r=await fetch(url.toString());
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return d;
 }
 async function fetchPages(path,params,token){
   let res=[],cur=null;
-  do{const p={...params,limit:100};if(cur)p.after=cur;const d=await fetchM(path,p,token);res=res.concat(d.data||[]);cur=d.paging?.cursors?.after;if(!d.paging?.next)cur=null;}while(cur);
+  do{
+    const p={...params,limit:100};
+    if(cur)p.after=cur;
+    const d=await fetchM(path,p,token);
+    res=res.concat(d.data||[]);
+    cur=d.paging?.cursors?.after;
+    if(!d.paging?.next)cur=null;
+  }while(cur);
   return res;
 }
 
-// Campaign alert logic
 function getAlerts(camp, avgCpc) {
   const ins=camp.insights; if(!ins)return [];
   const alerts=[];
@@ -146,7 +172,6 @@ function AlertChip({a}){
   return <span style={{display:"inline-block",padding:"1px 6px",borderRadius:3,fontSize:9,fontWeight:700,background:bg,color:tc,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.05em",textTransform:"uppercase"}}>{a.l}</span>;
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
 const Ic={
   spend:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.5 9.5c0-1.1.9-1.5 2.5-1.5s2.5.4 2.5 1.5-1 1.5-2.5 2-2.5.9-2.5 2 .9 1.5 2.5 1.5 2.5-.4 2.5-1.5"/></svg>,
   eye:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
@@ -164,7 +189,6 @@ const Ic={
   warn:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
 };
 
-// ─── CSS ──────────────────────────────────────────────────────────────────────
 const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -188,7 +212,6 @@ input,select,button,textarea{font-family:inherit;}select option{background:${T.s
 .dd-item:hover{background:${T.s2};}
 `;
 
-// ─── Atoms ────────────────────────────────────────────────────────────────────
 function Badge({children,color="gray"}){
   const m={green:[T.green+"14",T.green,T.green+"28"],red:[T.red+"14",T.red,T.red+"28"],yellow:["#FFCC2214","#FFCC22","#FFCC2228"],blue:[T.blue+"14",T.blue,T.blue+"28"],gray:[T.muted+"20",T.sub,T.muted+"30"]};
   const [bg,tc,bc]=m[color]||m.gray;
@@ -221,7 +244,6 @@ function Spinner(){
   );
 }
 
-// ─── Chart ────────────────────────────────────────────────────────────────────
 const METRICS=[
   {k:"spend",l:"Gasto",c:T.accent,fmt:brl,axis:"left"},
   {k:"roas",l:"ROAS",c:T.green,fmt:v=>`${Number(v).toFixed(2)}x`,axis:"right"},
@@ -276,7 +298,6 @@ function TimeChart({data}){
   );
 }
 
-// ─── Creative Card with ranking ───────────────────────────────────────────────
 function CreativeCard({cr,rank,maxVal,sortM}){
   const ins=cr.insights;
   const s=parseFloat(ins?.spend)||0, rv=gA(ins?.action_values,"purchase");
@@ -284,26 +305,28 @@ function CreativeCard({cr,rank,maxVal,sortM}){
   const curVal=sortM==="roas"?roas:sortM==="ctr"?parseFloat(ins?.ctr)||0:parseFloat(ins?.spend)||0;
   const pct100=maxVal>0?Math.round((curVal/maxVal)*100):0;
   const rank_colors=[T.accent,T.text,T.sub];
-  const [c1,c2]=cr.grad;
+  const [c1,c2]=cr.grad||["#111","#333"];
   const FreqWarn=parseFloat(ins?.frequency)>=3.5;
-  const FmtI=cr.format==="Vídeo"?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>:cr.format==="Carrossel"?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
+  const FmtI=cr.format==="Vídeo"
+    ?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    :cr.format==="Carrossel"
+    ?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    :<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
   return(
     <div className="ch" style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",transition:"all 0.2s",display:"flex",flexDirection:"column"}}>
-      {/* Thumbnail */}
       <div style={{position:"relative",height:170,background:`linear-gradient(135deg,${c1},${c2})`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}>
-        {cr.thumb?<img src={cr.thumb} alt="" style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}/>:
-          <><div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.35)"}}>{FmtI}</div>
-          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.08em"}}>{cr.format.toUpperCase()}</span></>}
-        {/* Rank badge */}
+        {cr.thumb
+          ?<img src={cr.thumb} alt="" style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}} onError={e=>{e.target.style.display="none";}}/>
+          :<><div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.35)"}}>{FmtI}</div>
+          <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.08em"}}>{(cr.format||"IMAGEM").toUpperCase()}</span></>
+        }
         {rank<=3&&<div style={{position:"absolute",top:8,left:8,width:22,height:22,borderRadius:6,background:rank===1?T.accent:rank===2?T.b2:T.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:rank===1?T.bg:rank_colors[rank-1],fontFamily:"'JetBrains Mono',monospace"}}>{rank}</div>}
         {FreqWarn&&<div style={{position:"absolute",top:8,right:8,background:T.blue+"22",border:`1px solid ${T.blue}44`,borderRadius:5,padding:"2px 6px",fontSize:9,fontWeight:700,color:T.blue,fontFamily:"'JetBrains Mono',monospace"}}>FREQ {parseFloat(ins?.frequency).toFixed(1)}x</div>}
         {roas>0&&<div style={{position:"absolute",bottom:8,right:8,background:"#00000088",border:`1px solid ${roas>=2?T.green+"44":T.border}`,borderRadius:5,padding:"2px 6px",fontSize:10,fontWeight:600,color:roas>=2?T.green:T.sub,fontFamily:"'JetBrains Mono',monospace"}}>{roas.toFixed(2)}x</div>}
       </div>
-      {/* Progress bar */}
       <div style={{height:2,background:T.border}}>
         <div style={{height:"100%",width:`${pct100}%`,background:rank===1?T.accent:T.b2,transition:"width 0.6s ease"}}/>
       </div>
-      {/* Info */}
       <div style={{padding:"13px 14px 15px",display:"flex",flexDirection:"column",gap:10,flex:1}}>
         <div>
           <p style={{fontSize:12,fontWeight:600,color:T.text,lineHeight:1.4,marginBottom:3}}>{cr.name}</p>
@@ -323,7 +346,6 @@ function CreativeCard({cr,rank,maxVal,sortM}){
   );
 }
 
-// ─── Account Switcher ─────────────────────────────────────────────────────────
 function AccountSwitcher({accounts,activeId,onSwitch,onAdd,onRemove}){
   const [open,setOpen]=useState(false);
   const ref=useRef(null);
@@ -363,7 +385,6 @@ function AccountSwitcher({accounts,activeId,onSwitch,onAdd,onRemove}){
   );
 }
 
-// ─── Login ────────────────────────────────────────────────────────────────────
 function Login({onDemo,onConnect}){
   return(
     <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:24,fontFamily:"'Syne',sans-serif",position:"relative",overflow:"hidden"}}>
@@ -404,9 +425,10 @@ function Login({onDemo,onConnect}){
   );
 }
 
-// ─── Config Modal ─────────────────────────────────────────────────────────────
 function Config({onSave,onClose}){
-  const [name,setName]=useState(""); const [tok,setTok]=useState(""); const [acc,setAcc]=useState("");
+  const [name,setName]=useState("");
+  const [tok,setTok]=useState("");
+  const [acc,setAcc]=useState("");
   const inp={width:"100%",padding:"10px 12px",borderRadius:8,background:T.bg,border:`1px solid ${T.border}`,color:T.text,fontSize:12,fontFamily:"'JetBrains Mono',monospace",outline:"none"};
   const lbl={display:"block",fontSize:10,color:T.sub,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.09em",fontFamily:"'JetBrains Mono',monospace"};
   const save=()=>{if(!name||!tok||!acc)return;onSave({id:Date.now().toString(),name,token:tok,accountId:acc.replace("act_","")});};
@@ -432,7 +454,6 @@ function Config({onSave,onClose}){
   );
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
 export default function App(){
   const [screen,setScreen]=useState("login");
   const [isDemo,setIsDemo]=useState(false);
@@ -459,7 +480,6 @@ export default function App(){
   const [asSearch,setAsSearch]=useState("");
 
   const activeAcc=accounts.find(a=>a.id===activeId);
-
   const loadDemo=()=>{setIsDemo(true);setOv(D_OV);setOvPrev(D_OV_PREV);setDaily(getDailyDemo("last_7d"));setCamps(D_CAMPS);setAdsets(D_ADSETS);setCreatives(D_CREATIVES);setScreen("dashboard");};
 
   const fetchData=useCallback(async()=>{
@@ -470,33 +490,109 @@ export default function App(){
     try{
       const dp=getDP(dateRange),pdp=getPrevDP(dateRange);
       const tr=JSON.stringify({since:dp.since,until:dp.until}),ptr=JSON.stringify({since:pdp.since,until:pdp.until});
-      // Account overview - current + prev
+
       const [ovR,ovPR]=await Promise.all([
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:tr,level:"account"},token),
         fetchM(`act_${accountId}/insights`,{fields:INS_F,time_range:ptr,level:"account"},token),
       ]);
-      setOv(ovR.data?.[0]||null);setOvPrev(ovPR.data?.[0]||null);
-      // Daily breakdown
+      setOv(ovR.data?.[0]||null);
+      setOvPrev(ovPR.data?.[0]||null);
+
       const dR=await fetchM(`act_${accountId}/insights`,{fields:"spend,impressions,clicks,ctr,actions,action_values",time_range:tr,level:"account",time_increment:1},token);
-      setDaily((dR.data||[]).map(d=>({date:d.date_start?.slice(5).replace("-","/"),spend:parseFloat(d.spend)||0,roas:(()=>{const rv=gA(d.action_values,"purchase"),s=parseFloat(d.spend)||1;return +(rv/s).toFixed(2);})(),ctr:parseFloat(d.ctr)||0,clicks:parseInt(d.clicks)||0})));
+      setDaily((dR.data||[]).map(d=>({
+        date:d.date_start?.slice(5).replace("-","/"),
+        spend:parseFloat(d.spend)||0,
+        roas:(()=>{const rv=gA(d.action_values,"purchase"),s=parseFloat(d.spend)||1;return +(rv/s).toFixed(2);})(),
+        ctr:parseFloat(d.ctr)||0,
+        clicks:parseInt(d.clicks)||0,
+      })));
+
       // Campaigns
-      const cs=await fetchPages(`act_${accountId}/campaigns`,{fields:"id,name,status,objective"},token);
-      const ci=await Promise.all(cs.map(async c=>{try{const r=await fetchM(`${c.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...c,insights:r.data?.[0]||null};}catch{return{...c,insights:null};}}));
+      const cs=await fetchPages(`act_${accountId}/campaigns`,{fields:"id,name,status,effective_status,objective"},token);
+      const ci=await Promise.all(cs.map(async c=>{
+        try{
+          const r=await fetchM(`${c.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
+          return{...c,effective_status:c.effective_status||c.status,insights:r.data?.[0]||null};
+        }catch{
+          return{...c,effective_status:c.effective_status||c.status,insights:null};
+        }
+      }));
       setCamps(ci);
-      // AdSets
-      const as=await fetchPages(`act_${accountId}/adsets`,{fields:"id,name,status,campaign_id,campaign{name}"},token);
-      const asi=await Promise.all(as.map(async a=>{try{const r=await fetchM(`${a.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);return{...a,campaign:a.campaign?.name||"",cid:a.campaign_id,insights:r.data?.[0]||null};}catch{return{...a,campaign:"",cid:a.campaign_id,insights:null};}}));
+
+      // FIX: AdSets — use effective_status
+      const as=await fetchPages(`act_${accountId}/adsets`,{
+        fields:"id,name,status,effective_status,campaign_id,campaign{name}",
+      },token);
+      const asi=await Promise.all(as.map(async a=>{
+        try{
+          const r=await fetchM(`${a.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
+          return{
+            ...a,
+            campaign:a.campaign?.name||"",
+            cid:a.campaign_id,
+            effective_status:a.effective_status||a.status,
+            insights:r.data?.[0]||null,
+          };
+        }catch{
+          return{...a,campaign:"",cid:a.campaign_id,effective_status:a.effective_status||a.status,insights:null};
+        }
+      }));
       setAdsets(asi);
-      // Creatives (ads)
-      const ads=await fetchPages(`act_${accountId}/ads`,{fields:"id,name,status,campaign_id,creative{id,thumbnail_url,image_url,title,body,call_to_action_type}"},token);
+
+      // FIX: Creatives — expanded fields for thumbnail and format detection
+      const CREATIVE_FIELDS = [
+        "id","thumbnail_url","image_url","title","body",
+        "call_to_action_type","video_id",
+        "object_story_spec{link_data{picture,child_attachments,name,description},video_data{image_url,title}}",
+      ].join(",");
+
+      const ads=await fetchPages(`act_${accountId}/ads`,{
+        fields:`id,name,status,effective_status,campaign_id,creative{${CREATIVE_FIELDS}}`,
+        effective_status:'["ACTIVE","PAUSED","ARCHIVED"]',
+      },token);
+
       const adsI=await Promise.all(ads.slice(0,60).map(async ad=>{
         try{
           const r=await fetchM(`${ad.id}/insights`,{fields:INS_F+",frequency",time_range:tr},token);
-          const cr=ad.creative,camp=ci.find(c=>c.id===ad.campaign_id);
-          return{id:ad.id,name:ad.name,cid:ad.campaign_id,campaign:camp?.name||"",status:ad.status,format:cr?.video_id?"Vídeo":cr?.object_story_spec?.link_data?.child_attachments?"Carrossel":"Imagem",thumb:cr?.thumbnail_url||cr?.image_url||null,title:cr?.title||"",body:cr?.body||"",grad:GRAD[Math.floor(Math.random()*GRAD.length)],insights:r.data?.[0]||null};
+          const cr=ad.creative;
+          const camp=ci.find(c=>c.id===ad.campaign_id);
+
+          // FIX: Detect format correctly
+          const isVideo=!!(cr?.video_id||cr?.object_story_spec?.video_data);
+          const isCarousel=!!(cr?.object_story_spec?.link_data?.child_attachments?.length);
+          const format=isVideo?"Vídeo":isCarousel?"Carrossel":"Imagem";
+
+          // FIX: Try all possible thumbnail locations
+          const thumb=
+            cr?.thumbnail_url||
+            cr?.image_url||
+            cr?.object_story_spec?.link_data?.picture||
+            cr?.object_story_spec?.video_data?.image_url||
+            null;
+
+          const title=
+            cr?.title||
+            cr?.object_story_spec?.link_data?.name||
+            cr?.object_story_spec?.video_data?.title||
+            ad.name||"";
+
+          return{
+            id:ad.id,
+            name:ad.name,
+            cid:ad.campaign_id,
+            campaign:camp?.name||"",
+            status:ad.effective_status||ad.status,
+            format,
+            thumb,
+            title,
+            body:cr?.body||cr?.object_story_spec?.link_data?.description||"",
+            grad:GRAD[Math.floor(Math.random()*GRAD.length)],
+            insights:r.data?.[0]||null,
+          };
         }catch{return null;}
       }));
       setCreatives(adsI.filter(Boolean));
+
     }catch(e){setError(e.message);}finally{setLoading(false);}
   },[isDemo,activeAcc,dateRange]);
 
@@ -506,39 +602,33 @@ export default function App(){
   const switchAccount=id=>{setActiveId(id);setIsDemo(false);};
   const removeAccount=id=>{setAccounts(p=>p.filter(a=>a.id!==id));if(activeId===id){const remaining=accounts.filter(a=>a.id!==id);setActiveId(remaining[0]?.id||null);}};
 
-  // Compute metrics + deltas
   const mk=(cur,prev)=>delta(parseFloat(cur)||0,parseFloat(prev)||0);
-  const spend=parseFloat(ov?.spend)||0, pSpend=parseFloat(ovPrev?.spend)||0;
-  const imp=parseInt(ov?.impressions)||0, pImp=parseInt(ovPrev?.impressions)||0;
-  const clk=parseInt(ov?.clicks)||0, pClk=parseInt(ovPrev?.clicks)||0;
-  const ctr=parseFloat(ov?.ctr)||0, pCtr=parseFloat(ovPrev?.ctr)||0;
-  const cpc=parseFloat(ov?.cpc)||0, pCpc=parseFloat(ovPrev?.cpc)||0;
+  const spend=parseFloat(ov?.spend)||0,pSpend=parseFloat(ovPrev?.spend)||0;
+  const imp=parseInt(ov?.impressions)||0,pImp=parseInt(ovPrev?.impressions)||0;
+  const clk=parseInt(ov?.clicks)||0,pClk=parseInt(ovPrev?.clicks)||0;
+  const ctr=parseFloat(ov?.ctr)||0,pCtr=parseFloat(ovPrev?.ctr)||0;
+  const cpc=parseFloat(ov?.cpc)||0,pCpc=parseFloat(ovPrev?.cpc)||0;
   const cpm=parseFloat(ov?.cpm)||0;
   const reach=parseInt(ov?.reach)||0;
-  const purch=gA(ov?.actions,"purchase"), pPurch=gA(ovPrev?.actions,"purchase");
-  const rev=gA(ov?.action_values,"purchase"), pRev=gA(ovPrev?.action_values,"purchase");
-  const roas=spend>0?rev/spend:0, pRoas=pSpend>0?pRev/pSpend:0;
-
-  // Avg CPC for alerts
+  const purch=gA(ov?.actions,"purchase"),pPurch=gA(ovPrev?.actions,"purchase");
+  const rev=gA(ov?.action_values,"purchase"),pRev=gA(ovPrev?.action_values,"purchase");
+  const roas=spend>0?rev/spend:0,pRoas=pSpend>0?pRev/pSpend:0;
   const avgCpc=cpc;
 
-  // Sorted campaigns
   const sortedCamps=[...camps]
-    .filter(c=>campStatus==="all"||c.status===campStatus)
+    .filter(c=>campStatus==="all"||(c.effective_status||c.status)===campStatus)
     .filter(c=>!campSearch||c.name.toLowerCase().includes(campSearch.toLowerCase()))
     .sort((a,b)=>{
       const v=x=>{if(!x.insights)return 0;switch(sortKey){case"spend":return parseFloat(x.insights.spend)||0;case"impressions":return parseInt(x.insights.impressions)||0;case"clicks":return parseInt(x.insights.clicks)||0;case"ctr":return parseFloat(x.insights.ctr)||0;case"cpc":return parseFloat(x.insights.cpc)||0;case"roas":{const r=gA(x.insights.action_values,"purchase"),s=parseFloat(x.insights.spend)||1;return r/s;}default:return 0;}};
       return sortDir==="desc"?v(b)-v(a):v(a)-v(b);
     });
 
-  // Sorted creatives
   const getCreativeVal=cr=>{if(!cr.insights)return 0;switch(crSort){case"roas":{const r=gA(cr.insights.action_values,"purchase"),s=parseFloat(cr.insights.spend)||1;return r/s;}case"ctr":return parseFloat(cr.insights.ctr)||0;default:return parseFloat(cr.insights.spend)||0;}};
   const filteredCr=[...creatives].filter(c=>crFmt==="all"||c.format===crFmt).filter(c=>!crSearch||c.name.toLowerCase().includes(crSearch.toLowerCase())||c.campaign.toLowerCase().includes(crSearch.toLowerCase())).sort((a,b)=>getCreativeVal(b)-getCreativeVal(a));
   const maxCreativeVal=filteredCr.length>0?getCreativeVal(filteredCr[0]):1;
 
   const srt=k=>{if(sortKey===k)setSD(d=>d==="desc"?"asc":"desc");else{setSK(k);setSD("desc");}};
   const arr=k=>sortKey===k?(sortDir==="desc"?"↓":"↑"):"↕";
-  const sc=s=>({ACTIVE:"green",PAUSED:"yellow",DELETED:"gray",ARCHIVED:"gray"}[s]||"blue");
   const thS=(k,l,click=true)=><th className={click?"sort-btn":""} onClick={click?()=>srt(k):undefined} style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:sortKey===k?T.accent:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",whiteSpace:"nowrap",fontWeight:500,cursor:click?"pointer":"default"}}>{l}{click?` ${arr(k)}`:""}</th>;
   const tdS={padding:"12px 16px",fontSize:12,color:T.text,borderTop:`1px solid ${T.border}`,fontFamily:"'JetBrains Mono',monospace"};
 
@@ -552,7 +642,6 @@ export default function App(){
       <style>{CSS}</style>
       {showCfg&&<Config onSave={addAccount} onClose={()=>setShowCfg(false)}/>}
 
-      {/* Header */}
       <header style={{position:"sticky",top:0,zIndex:100,height:52,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",borderBottom:`1px solid ${T.border}`,background:`${T.bg}f0`,backdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{display:"flex",alignItems:"center",gap:7}}>
@@ -574,7 +663,6 @@ export default function App(){
         </div>
       </header>
 
-      {/* Tabs */}
       <div style={{padding:"12px 24px 0",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",gap:3}}>
         {TABS.map((t,i)=><div key={t} className={`tab${tab===t?" on":""}`} onClick={()=>setTab(t)}>{TLABELS[i]}</div>)}
         <div style={{marginLeft:"auto",fontSize:9,color:T.muted,fontFamily:"'JetBrains Mono',monospace",paddingBottom:12,letterSpacing:"0.06em"}}>
@@ -602,10 +690,9 @@ export default function App(){
               <Stat icon={Ic.roas} label="ROAS" value={`${roas.toFixed(2)}x`} dlt={mk(roas,pRoas)} hi/>
             </div>
             {daily.length>0&&<div style={{marginBottom:20}}><TimeChart data={daily}/></div>}
-            {/* Alerts summary */}
             {camps.some(c=>getAlerts(c,avgCpc).length>0)&&(
               <div style={{background:T.s1,border:`1px solid ${T.border}`,borderRadius:12,padding:"14px 18px",marginBottom:20}}>
-                <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:12,color:T.orange}}><Ic.warn/><span style={{fontSize:13,fontWeight:600,color:T.text}}>Alertas de campanha</span></div>
+                <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:12}}><Ic.warn/><span style={{fontSize:13,fontWeight:600,color:T.text}}>Alertas de campanha</span></div>
                 <div style={{display:"flex",flexDirection:"column",gap:8}}>
                   {camps.filter(c=>getAlerts(c,avgCpc).length>0).map(c=>(
                     <div key={c.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
@@ -654,15 +741,16 @@ export default function App(){
             </div>
             <div style={{overflowX:"auto"}}>
               <table style={{width:"100%",borderCollapse:"collapse"}}>
-                <thead><tr style={{background:T.bg+"88"}}>{thS("name","Campanha",false)}{thS("status","Status",false)}{thS("spend","Gasto")}{thS("impressions","Impr.")}{thS("clicks","Cliques")}{thS("ctr","CTR")}{thS("cpc","CPC")}{thS("roas","ROAS")}<th style={{...{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",whiteSpace:"nowrap",fontWeight:500}}}>Alertas</th></tr></thead>
+                <thead><tr style={{background:T.bg+"88"}}>{thS("name","Campanha",false)}{thS("status","Status",false)}{thS("spend","Gasto")}{thS("impressions","Impr.")}{thS("clicks","Cliques")}{thS("ctr","CTR")}{thS("cpc","CPC")}{thS("roas","ROAS")}<th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",whiteSpace:"nowrap",fontWeight:500}}>Alertas</th></tr></thead>
                 <tbody>
                   {sortedCamps.length===0?<tr><td colSpan={9} style={{...tdS,textAlign:"center",padding:"48px",color:T.muted}}>Nenhuma campanha encontrada</td></tr>
                     :sortedCamps.map(c=>{
-                      const ins=c.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0,cp=gA(ins?.actions,"purchase");
+                      const ins=c.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0;
                       const al=getAlerts(c,avgCpc);
+                      const es=c.effective_status||c.status;
                       return(<tr key={c.id} className="rh" style={{transition:"background 0.15s"}}>
                         <td style={{...tdS,maxWidth:260}}><p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{c.name}</p><p style={{fontSize:10,color:T.muted,marginTop:2}}>{c.objective||"—"}</p></td>
-                        <td style={tdS}><Badge color={sc(c.status)}>{c.status}</Badge></td>
+                        <td style={tdS}><Badge color={statusColor(es)}>{statusLabel(es)}</Badge></td>
                         <td style={{...tdS,color:T.accent,fontWeight:600}}>{ins?brl(ins.spend):"—"}</td>
                         <td style={tdS}>{ins?num(ins.impressions):"—"}</td>
                         <td style={tdS}>{ins?num(ins.clicks):"—"}</td>
@@ -687,7 +775,7 @@ export default function App(){
               <table style={{width:"100%",borderCollapse:"collapse"}}>
                 <thead><tr style={{background:T.bg+"88"}}>
                   <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em",minWidth:220}}>Conjunto</th>
-                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Status</th>
+                  <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Status Real</th>
                   <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Gasto</th>
                   <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>Cliques</th>
                   <th style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace",textTransform:"uppercase",letterSpacing:"0.08em"}}>CTR</th>
@@ -700,6 +788,7 @@ export default function App(){
                   {adsets.filter(a=>!asSearch||a.name.toLowerCase().includes(asSearch.toLowerCase())).map(a=>{
                     const ins=a.insights,s=parseFloat(ins?.spend)||0,rv=gA(ins?.action_values,"purchase"),cr=s>0?rv/s:0;
                     const freq=parseFloat(ins?.frequency)||0;
+                    const es=a.effective_status||a.status;
                     const als=[];
                     if(parseFloat(ins?.ctr)>0&&parseFloat(ins?.ctr)<1)als.push({c:"warn",l:"CTR baixo"});
                     if(freq>=4)als.push({c:"freq",l:`Freq ${freq.toFixed(1)}x`});
@@ -709,7 +798,8 @@ export default function App(){
                         <p style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:500}}>{a.name}</p>
                         <p style={{fontSize:10,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{a.campaign}</p>
                       </td>
-                      <td style={tdS}><Badge color={sc(a.status)}>{a.status}</Badge></td>
+                      {/* FIX: Use effective_status for accurate status */}
+                      <td style={tdS}><Badge color={statusColor(es)}>{statusLabel(es)}</Badge></td>
                       <td style={{...tdS,color:T.accent,fontWeight:600}}>{ins?brl(ins.spend):"—"}</td>
                       <td style={tdS}>{ins?num(ins.clicks):"—"}</td>
                       <td style={{...tdS,color:parseFloat(ins?.ctr)<1&&parseFloat(ins?.ctr)>0?T.orange:T.text}}>{ins?pct(ins.ctr):"—"}</td>
@@ -724,7 +814,6 @@ export default function App(){
             </div>
           </div>
         ):(
-          // CREATIVES
           <>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16,flexWrap:"wrap"}}>
               <span style={{fontSize:13,fontWeight:600}}>Criativos <span style={{color:T.sub,fontWeight:400,fontSize:12,fontFamily:"'JetBrains Mono',monospace"}}>({filteredCr.length})</span></span>
@@ -746,7 +835,6 @@ export default function App(){
             }
           </>
         )}
-
         <div style={{marginTop:24,textAlign:"center",fontSize:9,color:T.muted,fontFamily:"'JetBrains Mono',monospace",letterSpacing:"0.06em"}}>
           {isDemo?"MODO DEMO — DADOS SIMULADOS":`META GRAPH API ${API_V} · ${new Date().toLocaleTimeString("pt-BR")}`}
         </div>
