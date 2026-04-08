@@ -14,14 +14,11 @@ const ATTR = {
 };
 
 // Todos os action_types que o Meta conta como "lead" no Gerenciador
-const LEAD_TYPES = [
-  "lead",
+// LEAD_TYPES para o breakdown visual (informativo, não para contar total)
+const LEAD_SUBTYPES = [
   "onsite_conversion.lead_grouped",
   "offsite_conversion.fb_pixel_lead",
   "contact",
-  "schedule",
-  "submit_application",
-  "leadgen.other",
   "onsite_conversion.messaging_first_reply",
   "onsite_conversion.messaging_conversation_started_7d",
 ];
@@ -76,13 +73,18 @@ const brl=v=>(parseFloat(v)||0).toLocaleString("pt-BR",{style:"currency",currenc
 const num=v=>(parseInt(v)||0).toLocaleString("pt-BR");
 const pct=v=>`${(parseFloat(v)||0).toFixed(2)}%`;
 
-// FIX: conta leads de TODOS os action_types relevantes (igual ao Gerenciador)
+// getLeads: usa 'lead' como valor principal — igual ao Gerenciador de Anúncios.
+// O Meta já agrega os sub-tipos dentro de 'lead'. Somar tudo causa double-count.
+// Fallback para tipos específicos de campanha (WhatsApp, mensagens) quando lead=0.
 function getLeads(actions){
   if(!actions)return 0;
-  return LEAD_TYPES.reduce((sum,t)=>{
-    const a=actions.find(x=>x.action_type===t);
-    return sum+(a?parseFloat(a.value):0);
-  },0);
+  const lead = gA(actions,"lead");
+  if(lead>0) return lead;
+  // Fallback: WhatsApp/mensagens quando objetivo não gera 'lead' direto
+  const messaging = gA(actions,"onsite_conversion.messaging_first_reply");
+  if(messaging>0) return messaging;
+  const contact = gA(actions,"contact");
+  return contact;
 }
 // Mantém getA para outros action_types específicos
 const gA=(arr,t)=>{if(!arr)return 0;const a=arr.find(x=>x.action_type===t);return a?parseFloat(a.value):0;};
@@ -339,7 +341,7 @@ function CreativeModal({cr,onClose}){
                   <div style={{background:T.s2,borderRadius:8,padding:"12px 14px"}}>
                     <p style={{fontSize:10,color:T.sub,fontFamily:"'JetBrains Mono',monospace",marginBottom:10,fontWeight:600}}>Breakdown de leads</p>
                     <div style={{display:"flex",flexDirection:"column",gap:5}}>
-                      {LEAD_TYPES.map(t=>{
+                      {["lead","onsite_conversion.lead_grouped","offsite_conversion.fb_pixel_lead","contact","onsite_conversion.messaging_first_reply","onsite_conversion.messaging_conversation_started_7d"].map(t=>{
                         const v=gA(ins?.actions,t);
                         if(!v)return null;
                         const pct100=Math.round((v/leads)*100);
@@ -667,7 +669,7 @@ export default function App(){
   const cpm=parseFloat(ov?.cpm)||0;
   const reach=parseInt(ov?.reach)||0;
   const purch=gA(ov?.actions,"purchase"),pPurch=gA(ovPrev?.actions,"purchase");
-  // FIX: usa getLeads que soma todos os tipos
+  // getLeads usa apenas "lead" como primário (igual ao Gerenciador)
   const leads=getLeads(ov?.actions),pLeads=getLeads(ovPrev?.actions);
   const rev=gA(ov?.action_values,"purchase"),pRev=gA(ovPrev?.action_values,"purchase");
   const roas=spend>0?rev/spend:0,pRoas=pSpend>0?pRev/pSpend:0;
